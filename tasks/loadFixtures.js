@@ -3,29 +3,52 @@ var wreck = require('wreck');
 var fs = require('fs');
 var path = require('path');
 var colors = require('ansicolors');
+var elasticsearch = require('elasticsearch');
 
 module.exports = function (grunt) {
   grunt.registerTask('loadFixtures', 'Loads fixtures into elasticsearch', function () {
     const config = this.options();
     const done = this.async();
-    const files = fs.readdirSync(config.dataDir);
-    let doneProcessing = 0;
+    const client = new elasticsearch.Client({
+      host: config.server
+    });
+    const ignoredFileRegExp = /^_/;
+    const jsExtensionRegExp = /(.js)/;
 
-    files.forEach(function (file) {
-      wreck.post(`${config.server}/_bulk`, {
-        payload: fs.createReadStream(path.join(config.dataDir, file)),
-        json: true
-      }, function bulkResponse(err, res, payload) {
-        var status;
-        if (err || res.statusCode !== 200) {
-          grunt.fail.warn(err || payload);
-          status = colors.red('error');
-        } else {
-          status = colors.green('success');
-        }
-        grunt.log.writeln(`[${status}] ${file}`);
-        if (++doneProcessing === files.length) done();
+    function ignoredFile(file) {
+      return !file.match(ignoredFileRegExp);
+    }
+
+    function getIndexName(file) {
+      return file.replace(jsExtensionRegExp, '');
+    }
+
+    const indexFiles = fs.readdirSync(config.indicesDir).filter(ignoredFile);
+    const bulkFiles = fs.readdirSync(config.bulkDir).filter(ignoredFile);
+
+    Promise.all(indexFiles
+      .map(function createIndex(file) {
+      return client.indices.create({
+        index: getIndexName(file),
+        body: require(path.join(config.indicesDir, file))
       });
+    }))
+    .then(function createIndexDone(res) {
+      grunt.log.writeln(`[${colors.green('success')}][indices] ${indexFiles.join(', ')}`);
+    })
+    .then(function loadBulkData() {
+      return Promise.all(bulkFiles.map(function bulk(file) {
+        return client.bulk({
+          body: require(path.join(config.bulkDir, file)),
+        });
+      }));
+    })
+    .then(function bulkDone(res) {
+      grunt.log.writeln(`[${colors.green('success')}][bulk] ${bulkFiles.join(', ')}`);
+    })
+    .then(done)
+    .catch(function error(e) {
+      grunt.fail.warn(e);
     });
   });
 };

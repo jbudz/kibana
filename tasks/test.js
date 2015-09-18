@@ -29,13 +29,14 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test:ui:server', [
     'esvm:ui',
-    'loadFixtures',
     'run:testUIServer',
     'downloadSelenium',
     'run:devSeleniumServer:keepalive'
   ]);
 
   grunt.registerTask('test:ui:runner', [
+    'clearIndices',
+    'loadFixtures',
     'intern:dev'
   ]);
 
