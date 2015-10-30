@@ -100,6 +100,12 @@ define(function (require) {
         delete mergedFilter[filter.type];
       }
 
+      delete filter.source.meta.alias;
+      if (mergedFilter.alias) {
+        filter.source.meta.alias = mergedFilter.alias;
+      }
+      delete mergedFilter.alias;
+
       return angular.copy(mergedFilter, filter.source);
     };
 

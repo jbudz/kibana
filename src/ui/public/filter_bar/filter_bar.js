@@ -60,8 +60,9 @@ define(function (require) {
         var privateFieldRegexp = /(^\$|meta)/;
         $scope.startEditingFilter = function (source) {
           var model = _.cloneDeep(source);
-          var filterType;
+          model.alias = source.meta.alias || null;
 
+          var filterType;
           //Hide private properties and figure out what type of filter this is
           _.each(model, function (value, key) {
             if (key.match(privateFieldRegexp)) {
