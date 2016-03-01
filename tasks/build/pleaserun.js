@@ -16,15 +16,19 @@ module.exports = function createServices(grunt) {
         '--install-prefix', service.outputDir,
         '--overwrite',
         '--user', 'kibana',
+        '--group', 'kibana',
         '--sysv-log-path', '/var/log/kibana/',
         '-p', service.name,
         '-v', service.version,
-        '/opt/kibana/bin/kibana'
+        '/opt/kibana/bin/kibana',
+
+        //Plugin installs will rebuild assets under a different user
+        //Upgrades will delete and recreate the kibana user with a potential different id
+        '--prestart', 'chown -R kibana:kibana /opt/kibana/optimize'
       ]);
     });
 
     grunt.file.mkdir(userScriptsDir);
     exec('please-manage-user', ['--output', userScriptsDir, 'kibana']);
-    appendFileSync(resolve(userScriptsDir, 'installer.sh'), 'chown kibana /opt/kibana/optimize');
   });
 };
