@@ -15,6 +15,7 @@ module.exports = function createServices(grunt) {
         '--install-prefix', service.outputDir,
         '--overwrite',
         '--user', 'kibana',
+        '--group', 'kibana',
         '--sysv-log-path', '/var/log/kibana/',
         '-p', service.name,
         '-v', service.version,
