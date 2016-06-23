@@ -34,7 +34,8 @@ export default function TermsAggDefinition(Private) {
     title: 'Terms',
     makeLabel: function (agg) {
       let params = agg.params;
-      return params.field.displayName + ': ' + params.order.display;
+      const display = _.get(params, 'orderAgg.type.name') === 'count' ? 'Descending' : params.order.display;
+      return params.field.displayName + ': ' + display;
     },
     createFilter: createFilter,
     params: [
@@ -143,13 +144,13 @@ export default function TermsAggDefinition(Private) {
             output.params.valueType = agg.field().type === 'number' ? 'float' : agg.field().type;
           }
 
-          if (!orderAgg) {
-            order[agg.params.orderBy || '_count'] = dir;
+          if (!orderAgg && agg.params.orderBy) {
+            order[agg.params.orderBy] = dir;
             return;
           }
 
-          if (orderAgg.type.name === 'count') {
-            order._count = dir;
+          if (orderAgg.type.name === 'count' || (!orderAgg && !agg.params.orderBy)) {
+            output.params.order = '_count';
             return;
           }
 
@@ -171,6 +172,10 @@ export default function TermsAggDefinition(Private) {
           { display: 'Descending', val: 'desc' },
           { display: 'Ascending', val: 'asc' }
         ],
+        showOrderSort(agg) {
+          let orderAgg = agg.params.orderAgg || agg.vis.aggs.getResponseAggById(agg.params.orderBy);
+          return _.get(orderAgg, 'type.name') !== 'count';
+        },
         write: _.noop // prevent default write, it's handled by orderAgg
       },
       {
