@@ -18,7 +18,8 @@ export default function () {
   });
 
   return {
-    storedFields: ['*', '_source'],
+    storedFields: ['*'],
+    _source: true,
     scriptFields: scriptFields,
     fielddataFields: fielddataFields
   };

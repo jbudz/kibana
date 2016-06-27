@@ -85,7 +85,7 @@ app.service('savedVisualizations', function (Promise, es, kbnIndex, SavedVis, Pr
         query: {
           simple_query_string: {
             query: searchString + '*',
-            stored_fields: ['title^3', 'description'],
+            fields: ['title^3', 'description'],
             default_operator: 'AND'
           }
         }
