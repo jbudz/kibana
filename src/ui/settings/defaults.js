@@ -101,6 +101,18 @@ export default function defaultSettingsProvider() {
       'search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator" target="_blank">' +
       'Explanation of cell dimensions</a>',
     },
+    'visualization:tileMap:leafletDefaults': {
+      type: 'json',
+      value: JSON.stringify({
+        url: 'https://tiles.elastic.co/{z}/{x}/{y}.png?elastic_tiles_agree_tos=yes',
+        options: {
+          minZoom: 1,
+          maxZoom: 8,
+          subdomains: [],
+          attribution: '© [OpenStreetMap](http://www.openstreetmap.org/copyright) contributors'
+        }
+      }, null, 2)
+    },
     'visualization:tileMap:WMSdefaults': {
       value: JSON.stringify({
         enabled: false,
