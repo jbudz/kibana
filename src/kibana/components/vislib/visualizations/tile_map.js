@@ -75,11 +75,8 @@ define(function (require) {
           self.addLatLng(self.geoJson);
 
           var div = $(this).addClass('tilemap');
-          var tileLayer = L.tileLayer('https://otile{s}-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg', {
-            attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; ' +
-              'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-              '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
-            subdomains: '1234'
+          var tileLayer = L.tileLayer('https://tiles.elastic.co/{z}/{x}/{y}.png', {
+            attribution: 'Map data © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           });
 
           var drawOptions = {draw: {}};
@@ -98,7 +95,7 @@ define(function (require) {
 
           var mapOptions = {
             minZoom: 1,
-            maxZoom: 18,
+            maxZoom: 10,
             layers: tileLayer,
             center: self._attr.mapCenter,
             zoom: self._attr.mapZoom,
