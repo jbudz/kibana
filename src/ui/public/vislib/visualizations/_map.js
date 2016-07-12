@@ -9,12 +9,9 @@ define(function (require) {
     let defaultMarkerType = 'Scaled Circle Markers';
 
     let mapTiles = {
-      url: 'https://otile{s}-s.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpeg',
+      url: 'https://tiles.elastic.co/{z}/{x}/{y}.png',
       options: {
-        attribution: 'Tiles by <a href="http://www.mapquest.com/">MapQuest</a> &mdash; ' +
-          'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-          '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
-        subdomains: '1234'
+        attribution: 'Map data © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       }
     };
 
@@ -48,7 +45,7 @@ define(function (require) {
 
       let mapOptions = {
         minZoom: 1,
-        maxZoom: 18,
+        maxZoom: 10,
         noWrap: true,
         maxBounds: L.latLngBounds([-90, -220], [90, 220]),
         scrollWheelZoom: false,
