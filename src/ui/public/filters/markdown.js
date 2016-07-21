@@ -1,13 +1,9 @@
-import marked from 'marked';
+import MarkdownIt from 'markdown-it';
 import uiModules from 'ui/modules';
 
-marked.setOptions({
-  gfm: true, // GitHub-flavored markdown
-  sanitize: true // Sanitize HTML tags
-});
-
+const markdown = new MarkdownIt();
 uiModules
   .get('kibana')
   .filter('markdown', function ($sce) {
-    return md => md ? $sce.trustAsHtml(marked(md)) : '';
+    return md => md ? $sce.trustAsHtml(markdown.render(md)) : '';
   });

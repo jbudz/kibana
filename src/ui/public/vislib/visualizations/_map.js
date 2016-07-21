@@ -1,11 +1,8 @@
 import _ from 'lodash';
 import $ from 'jquery';
 import L from 'leaflet';
-import marked from 'marked';
-marked.setOptions({
-  gfm: true, // Github-flavored markdown
-  sanitize: true // Sanitize HTML tags
-});
+import MarkdownIt from 'markdown-it';
+const markdown = new MarkdownIt();
 
 import VislibVisualizationsMarkerTypesScaledCirclesProvider from 'ui/vislib/visualizations/marker_types/scaled_circles';
 import VislibVisualizationsMarkerTypesShadedCirclesProvider from 'ui/vislib/visualizations/marker_types/shaded_circles';
@@ -18,7 +15,7 @@ export default function MapFactory(Private, tilemap) {
   let defaultMarkerType = 'Scaled Circle Markers';
 
   let tilemapOptions = tilemap.options;
-  let attribution = marked(tilemapOptions.attribution);
+  let attribution = markdown.render(tilemapOptions.attribution);
 
   let mapTiles = {
     url: tilemap.url,
