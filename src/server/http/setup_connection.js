@@ -21,6 +21,9 @@ export default function (kbnServer, server, config) {
       cors: config.get('server.cors'),
       payload: {
         maxBytes: config.get('server.maxPayloadBytes')
+      },
+      security: {
+        hsts: true
       }
     }
   };
