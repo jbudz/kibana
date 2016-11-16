@@ -6,6 +6,7 @@ import Boom from 'boom';
 import Hapi from 'hapi';
 import getDefaultRoute from './get_default_route';
 import versionCheckMixin from './version_check';
+import { handleShortUrlError } from './short_url_error';
 import { shortUrlAssertValid } from './short_url_assert_valid';
 
 module.exports = async function (kbnServer, server, config) {
@@ -118,7 +119,7 @@ module.exports = async function (kbnServer, server, config) {
         shortUrlAssertValid(url);
         reply().redirect(config.get('server.basePath') + url);
       } catch (err) {
-        reply(err);
+        reply(handleShortUrlError(err));
       }
     }
   });
@@ -132,7 +133,7 @@ module.exports = async function (kbnServer, server, config) {
         const urlId = await shortUrlLookup.generateUrlId(request);
         reply(urlId);
       } catch (err) {
-        reply(err);
+        reply(handleShortUrlError(err));
       }
     }
   });
