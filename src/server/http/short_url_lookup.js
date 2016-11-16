@@ -80,16 +80,14 @@ export default function (server) {
   }
 
   return {
-    async generateUrlId(req) {
-      const url = req.payload.url;
+    async generateUrlId(url, req) {
       const urlId = createUrlId(url);
       const urlDoc = await getUrlDoc(urlId, req);
       if (urlDoc) return urlId;
 
       return createUrlDoc(url, urlId, req);
     },
-    async getUrl(req) {
-      const urlId = req.params.urlId;
+    async getUrl(urlId, req) {
       try {
         const urlDoc = await getUrlDoc(urlId, req);
         if (!urlDoc) throw new Error('Requested shortened url does not exist in kibana index');
