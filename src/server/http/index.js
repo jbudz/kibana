@@ -114,7 +114,7 @@ module.exports = async function (kbnServer, server, config) {
     path: '/goto/{urlId}',
     handler: async function (request, reply) {
       try {
-        const url = await shortUrlLookup.getUrl(request.params.urlId);
+        const url = await shortUrlLookup.getUrl(request);
         shortUrlAssertValid(url);
         reply().redirect(config.get('server.basePath') + url);
       } catch (err) {
@@ -129,7 +129,7 @@ module.exports = async function (kbnServer, server, config) {
     handler: async function (request, reply) {
       try {
         shortUrlAssertValid(request.payload.url);
-        const urlId = await shortUrlLookup.generateUrlId(request.payload.url);
+        const urlId = await shortUrlLookup.generateUrlId(request);
         reply(urlId);
       } catch (err) {
         reply(err);
