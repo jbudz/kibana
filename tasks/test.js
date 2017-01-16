@@ -65,8 +65,8 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test:ui', [
     'checkPlugins',
-    'esvm:ui',
-    'run:testUIServer',
+    'esvm:tribe',
+    'run:testTribeServer',
     'run:chromeDriver',
     'clean:screenshots',
     'intern:dev',
@@ -77,8 +77,8 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test:ui:server', [
     'checkPlugins',
-    'esvm:ui',
-    'run:testUIDevServer:keepalive'
+    'esvm:tribe',
+    'run:testTribeServer:keepalive'
   ]);
 
   grunt.registerTask('test:ui:runner', [
@@ -89,7 +89,7 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask('test:api', [
-    'esvm:ui',
+    'esvm:tribe',
     'run:apiTestServer',
     'intern:api',
     'esvm_shutdown:ui',

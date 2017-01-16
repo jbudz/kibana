@@ -77,6 +77,23 @@ module.exports = function (grunt) {
       ]
     },
 
+    testTribeServer: {
+      options: {
+        wait: false,
+        ready: /Server running/,
+        quiet: false,
+        failOnError: false
+      },
+      cmd: binScript,
+      args: [
+        ...stdDevArgs,
+        '--server.port=' + uiConfig.servers.kibana.port,
+        '--elasticsearch.url=' + format(uiConfig.servers.elasticsearch),
+        '--elasticsearch.tribe.url=' + format(uiConfig.servers.tribe),
+        ...kbnServerFlags,
+      ]
+    },
+
     testUIDevServer: {
       options: {
         wait: false,

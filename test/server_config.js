@@ -24,6 +24,30 @@ module.exports = {
       auth: shield.admin.username + ':' + shield.admin.password,
       username: shield.admin.username,
       password: shield.admin.password
+    },
+    tribe: {
+      protocol: process.env.TEST_ES_PROTOCOL || 'http',
+      hostname: process.env.TEST_ES_HOSTNAME || 'localhost',
+      port: parseInt(process.env.TEST_ES_PORT, 10) || 9250,
+      auth: shield.admin.username + ':' + shield.admin.password,
+      username: shield.admin.username,
+      password: shield.admin.password
+    },
+    data1: {
+      protocol: process.env.TEST_ES_PROTOCOL || 'http',
+      hostname: process.env.TEST_ES_HOSTNAME || 'localhost',
+      port: parseInt(process.env.TEST_ES_PORT, 10) || 9230,
+      auth: shield.admin.username + ':' + shield.admin.password,
+      username: shield.admin.username,
+      password: shield.admin.password
+    },
+    data2: {
+      protocol: process.env.TEST_ES_PROTOCOL || 'http',
+      hostname: process.env.TEST_ES_HOSTNAME || 'localhost',
+      port: parseInt(process.env.TEST_ES_PORT, 10) || 9240,
+      auth: shield.admin.username + ':' + shield.admin.password,
+      username: shield.admin.username,
+      password: shield.admin.password
     }
   },
   apps: {

@@ -39,19 +39,19 @@ module.exports = function (grunt) {
         },
         nodes: [{
           cluster: { name: 'data-01' },
-          http: { port: 9201 },
+          http: { port: 9220 },
           node: { name: 'node-01', data: true, master: true, max_local_storage_nodes: 5 }
         }, {
           cluster: { name: 'data-02' },
-          http: { port: 9202 },
+          http: { port: 9230 },
           node: { name: 'node-02', data: true, master: true, max_local_storage_nodes: 5 }
         }, {
           cluster: { name: 'admin' },
-          http: { port: 9200 },
+          http: { port: 9240 },
           node: { name: 'node-03', data: true, master: true, max_local_storage_nodes: 5 }
         }, {
           cluster: { name: 'tribe' },
-          http: { port: 9203 },
+          http: { port: 9250 },
           node: { name: 'node-04', max_local_storage_nodes: 5 },
           tribe: {
             c1: {
@@ -73,7 +73,7 @@ module.exports = function (grunt) {
             zen: {
               ping: {
                 unicast: {
-                  hosts: [ 'localhost:9201', 'localhost:9202' ]
+                  hosts: [ 'localhost:9230', 'localhost:9240' ]
                 }
               }
             }
