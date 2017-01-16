@@ -10,7 +10,7 @@ define(function (require) {
     }],
     tunnelOptions: serverConfig.servers.webdriver,
     functionalSuites: [
-      'test/functional/apps/index'
+      'test/functional/tribe/index',
     ],
 
     excludeInstrumentation: /.*/,

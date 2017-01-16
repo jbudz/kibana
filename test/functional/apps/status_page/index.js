@@ -1,8 +1,8 @@
 import {
   bdd,
-} from '../../support';
+} from '../../../support';
 
-import PageObjects from '../../support/page_objects';
+import PageObjects from '../../../support/page_objects';
 
 const expect = require('expect.js');
 

@@ -3,7 +3,6 @@
 define(function (require) {
   require('intern/dojo/node!../../support/env_setup');
   const filterTests = require('intern/dojo/node!../lib/filter_tests');
-  console.log(filterTests);
   const bdd = require('intern!bdd');
   const intern = require('intern');
 
@@ -23,7 +22,13 @@ define(function (require) {
     ];
 
     const apps = filterTests([
-      'intern/dojo/node!./dev_tools',
+      'intern/dojo/node!./xpack',
+      'intern/dojo/node!./discover',
+      'intern/dojo/node!./management',
+      'intern/dojo/node!./visualize',
+      'intern/dojo/node!./console',
+      'intern/dojo/node!./dashboard',
+      'intern/dojo/node!./status_page'
     ]);
 
     require(supportPages.concat(apps), (loadedPageObjects, loadedSupport) => {

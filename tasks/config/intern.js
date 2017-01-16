@@ -19,6 +19,11 @@ module.exports = function (grunt) {
         config: 'test/intern_api'
       }
     },
+    tribe: {
+      options: {
+        config: 'test/intern_tribe'
+      }
+    },
     visualRegression: {
       options: {
         runType: 'runner',
