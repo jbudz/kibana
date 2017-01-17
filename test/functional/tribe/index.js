@@ -3,7 +3,6 @@
 define(function (require) {
   require('intern/dojo/node!../../support/env_setup');
   const filterTests = require('intern/dojo/node!../lib/filter_tests');
-  console.log(filterTests);
   const bdd = require('intern!bdd');
   const intern = require('intern');
 

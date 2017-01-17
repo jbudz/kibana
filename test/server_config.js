@@ -54,6 +54,9 @@ module.exports = {
     status_page: {
       pathname: 'status'
     },
+    timelion: {
+      pathname: '/app/timelion'
+    },
     discover: {
       pathname: kibanaURL,
       hash: '/discover',
