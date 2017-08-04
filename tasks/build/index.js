@@ -1,4 +1,8 @@
 import { flatten } from 'lodash';
+import { join } from 'path';
+
+import exec from '../utils/exec';
+
 module.exports = function (grunt) {
   grunt.registerTask('build', 'Build packages', function () {
     grunt.task.run(flatten([
@@ -31,5 +35,26 @@ module.exports = function (grunt) {
       ],
       '_build:shasums'
     ]));
+  });
+
+  grunt.registerTask('build:docker', 'Build packages from a container', function () {
+    const composePath = join(grunt.config.get('root'), 'tasks/build/docker/docker-compose.yml');
+    const env = Object.assign(process.env, {
+      KIBANA_NODE_VERSION:  grunt.config.get('nodeVersion'),
+      KIBANA_BUILD_CONTEXT: grunt.config.get('root'),
+      KIBANA_BUILD_OPTIONS: grunt.option.flags().join(' ')
+    });
+
+    const useCache = grunt.option('cache');
+
+    exec('docker-compose', [
+      '-f', composePath,
+      'build',
+      useCache ? '' : '--no-cache',
+    ].filter(Boolean), { env });
+    exec('docker-compose', [
+      '-f', composePath,
+      'up'
+    ], { env });
   });
 };

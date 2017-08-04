@@ -345,12 +345,9 @@ node scripts/functional_test_runner
 
 ### Building OS packages
 
-Packages are built using fpm, pleaserun, dpkg, and rpm.  fpm and pleaserun can be installed using gem.  Package building has only been tested on Linux and is not supported on any other platform.
+Packages are built in a Docker container.
 
 ```bash
-apt-get install ruby-dev rpm
-gem install fpm -v 1.5.0
-gem install pleaserun -v 0.0.24
 npm run build -- --skip-archives
 ```
 
