@@ -24,8 +24,6 @@ export default function (grunt) {
         expand: true,
         cwd: 'test/functional/screenshots',
         src: ['**'],
-
-        //TODO: this needs to be the jenkins build number
         dest: `kibana-${version}/${BUILD_NUMBER}/`
       }]
     }
