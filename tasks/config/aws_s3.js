@@ -15,6 +15,18 @@ export default function (grunt) {
         src: ['**'],
         dest: `kibana/staging/${version}-${sha.substr(0, 7)}/kibana/`
       }]
+    },
+    screenshots: {
+      bucket: 'kibana-screenshots.elastic.co',
+      region: 'us-east-1',
+      files: [{
+        expand: true,
+        cwd: 'test/functional/screenshots',
+        src: ['**'],
+
+        //TODO: this needs to be the jenkins build number
+        dest: `kibana-${version}-${sha.substr(0, 7)}/`
+      }]
     }
   };
 }
