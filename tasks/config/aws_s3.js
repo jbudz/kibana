@@ -1,5 +1,6 @@
 export default function (grunt) {
   const { sha, version } = grunt.config.get('build');
+  const BUILD_NUMBER = process.env.BUILD_NUMBER;
 
   return {
     options: {
@@ -25,7 +26,7 @@ export default function (grunt) {
         src: ['**'],
 
         //TODO: this needs to be the jenkins build number
-        dest: `kibana-${version}-${sha.substr(0, 7)}/`
+        dest: `kibana-${version}/${BUILD_NUMBER}/`
       }]
     }
   };
