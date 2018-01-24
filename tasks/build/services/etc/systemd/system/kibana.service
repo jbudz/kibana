@@ -1,6 +1,6 @@
 [Unit]
 Description=Kibana
- 
+
 [Service]
 Type=simple
 User=kibana

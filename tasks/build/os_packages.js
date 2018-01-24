@@ -1,14 +1,12 @@
 import { resolve } from 'path';
-import { indexBy } from 'lodash';
 import exec from '../utils/exec';
 
 export default (grunt) => {
   const { config } = grunt;
   const targetDir = config.get('target');
   const rootDir = grunt.config.get('root');
+  const staticBuildDir = resolve(rootDir, '/tasks/build');
   const packageScriptsDir = resolve(rootDir, '/tasks/build/package_scripts');
-  const servicesDir = resolve(rootDir, '/tasks/build/services');
-  const configDir = resolve(rootDir, '/tasks/build/config');
   const packages = config.get('packages');
   const fpm = args => exec('fpm', args);
 
@@ -17,7 +15,7 @@ export default (grunt) => {
 
     config.get('platforms')
       .filter(({ name }) => /linux-x86_64$/.test(name))
-      .forEach(({ buildDir, debArch, rpmArch }) => {
+      .forEach(({ buildDir: kibanaBuildDir, debArch, rpmArch }) => {
         const baseOptions = [
           '--force',
           // we force dashes in the version file name because otherwise fpm uses
@@ -59,10 +57,11 @@ export default (grunt) => {
           '--rpm-os', 'linux'
         ];
         const args = [
-          `${buildDir}/=${packages.path.home}/`,
-          `${configDir}/=${packages.path.conf}/`,
-          `${buildDir}/data/=${packages.path.data}/`,
-          `${servicesDir}/etc/=/etc/`
+          `${kibanaBuildDir}/=${packages.path.home}/`,
+          `${kibanaBuildDir}/data/=${packages.path.data}/`,
+          `${staticBuildDir}/config/=${packages.path.conf}/`,
+          `${staticBuildDir}/services/etc/=/etc/`
+          `${staticBuildDir}/services/usr/=/usr/`
         ];
 
         //Manually find flags, multiple args without assignment are not entirely parsed
