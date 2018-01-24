@@ -5,8 +5,10 @@ import exec from '../utils/exec';
 export default (grunt) => {
   const { config } = grunt;
   const targetDir = config.get('target');
-  const packageScriptsDir = grunt.config.get('packageScriptsDir');
-  const servicesByName = indexBy(config.get('services'), 'name');
+  const rootDir = grunt.config.get('root');
+  const packageScriptsDir = resolve(rootDir, '/tasks/build/package_scripts');
+  const servicesDir = resolve(rootDir, '/tasks/build/services');
+  const configDir = resolve(rootDir, '/tasks/build/config');
   const packages = config.get('packages');
   const fpm = args => exec('fpm', args);
 
@@ -58,10 +60,9 @@ export default (grunt) => {
         ];
         const args = [
           `${buildDir}/=${packages.path.home}/`,
-          `${buildDir}/config/=${packages.path.conf}/`,
+          `${configDir}/=${packages.path.conf}/`,
           `${buildDir}/data/=${packages.path.data}/`,
-          `${servicesByName.sysv.outputDir}/etc/=/etc/`,
-          `${servicesByName.systemd.outputDir}/etc/=/etc/`
+          `${servicesDir}/etc/=/etc/`
         ];
 
         //Manually find flags, multiple args without assignment are not entirely parsed
