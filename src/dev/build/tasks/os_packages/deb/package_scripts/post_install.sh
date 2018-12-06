@@ -19,3 +19,17 @@ esac
 chown -R <%= user %>:<%= group %> <%= optimizeDir %>
 chown <%= user %>:<%= group %> <%= dataDir %>
 chown <%= user %>:<%= group %> <%= pluginsDir %>
+
+systemd_target= "/usr/lib/systemd/system"
+sysv_target="/etc/init.d"
+if [ -d $systemd_target ] && then
+  echo -n "Installing systemd service..."
+  cp "<%= serviceDir %>/systemd/kibana.service" "$syv_target/kibana.service"
+  echo -n "done."
+elif [ -d $sysv_target ]; then
+  echo -n "Installing sysv service..."
+  cp "<%= serviceDir %>/sysv/kibana" "$sysv_target/kibana"
+  echo -n "done."
+else
+  echo "No system service found, check <%= serviceDir %> to manually install."
+fi

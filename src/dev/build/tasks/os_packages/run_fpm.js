@@ -112,6 +112,9 @@ export async function runFpm(config, log, build, type, pkgSpecificFlags) {
     '--template-value',
     `dataDir=/var/lib/kibana`,
 
+    '--template-value',
+    'serviceDir=/usr/share/kibana/service_templates',
+
     // config and data directories are copied to /usr/share and /var/lib
     // below, so exclude them from the main package source located in
     // /usr/share/kibana/config. PATHS MUST BE RELATIVE, so drop the leading slash
