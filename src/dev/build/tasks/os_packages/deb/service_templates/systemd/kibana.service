@@ -7,6 +7,7 @@ StartLimitBurst=3
 Type=simple
 User=kibana
 Group=kibana
+EnvironmentFile=-/etc/sysconfig/kibana
 EnvironmentFile=-/etc/default/kibana
 ExecStart=/usr/share/kibana/bin/kibana "-c /etc/kibana/kibana.yml"
 Restart=always
