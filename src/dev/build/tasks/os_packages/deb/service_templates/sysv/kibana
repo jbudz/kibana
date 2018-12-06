@@ -16,6 +16,12 @@
 ### END INIT INFO
 
 name=kibana
+user=kibana
+group=kibana
+chroot=/
+chdir=/
+nice=0
+
 program=/usr/share/kibana/bin/kibana
 args=-c\\\ /etc/kibana/kibana.yml
 pidfile="/var/run/$name.pid"
@@ -24,8 +30,6 @@ pidfile="/var/run/$name.pid"
 [ -r /etc/default/$name ] && . /etc/default/$name
 
 export NODE_OPTIONS
-
-[ -z "$nice" ] && nice=0
 
 trace() {
   logger -t "/etc/init.d/kibana" "$@"

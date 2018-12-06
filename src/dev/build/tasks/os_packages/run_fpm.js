@@ -28,12 +28,12 @@ export async function runFpm(config, log, build, type, pkgSpecificFlags) {
   const resolveWithTrailingSlash = (...paths) => `${resolve(...paths)}/`;
 
   const fromBuild = (...paths) => build.resolvePathForPlatform(linux, ...paths);
-
+  const isRpm = type === 'rpm';
   const pickLicense = () => {
     if (build.isOss()) {
-      return type === 'rpm' ? 'ASL 2.0' : 'ASL-2.0';
+      return isRpm ? 'ASL 2.0' : 'ASL-2.0';
     } else {
-      return type === 'rpm' ? 'Elastic License' : 'Elastic-License';
+      return isRpm ? 'Elastic License' : 'Elastic-License';
     }
   };
 
@@ -139,6 +139,10 @@ export async function runFpm(config, log, build, type, pkgSpecificFlags) {
       type,
       'service_templates'
     )}=/usr/share/kibana/service_templates/`,
+
+    `${resolveWithTrailingSlash(__dirname, 'common/env/kibana')}=${
+      isRpm ? '/etc/sysconfig/kibana' : '/etc/default/kibana'
+    }`,
   ];
 
   log.debug('calling fpm with args:', args);
