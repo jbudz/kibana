@@ -20,7 +20,6 @@ program=/usr/share/kibana/bin/kibana
 args=-c\\\ /etc/kibana/kibana.yml
 pidfile="/var/run/$name.pid"
 
-[ -r /etc/default/$name ] && . /etc/default/$name
 [ -r /etc/sysconfig/$name ] && . /etc/sysconfig/$name
 
 export NODE_OPTIONS

@@ -134,8 +134,11 @@ export async function runFpm(config, log, build, type, pkgSpecificFlags) {
     // copy the data directory at /var/lib/kibana
     `${resolveWithTrailingSlash(fromBuild('data'))}=/var/lib/kibana/`,
 
-    `${resolveWithTrailingSlash(__dirname, type, 'service_templates/sysv/etc')}=/etc/`,
-    `${resolveWithTrailingSlash(__dirname, type, 'service_templates/systemd/etc')}=/etc/`,
+    `${resolveWithTrailingSlash(
+      __dirname,
+      type,
+      'service_templates'
+    )}=/usr/share/kibana/service_templates/`,
   ];
 
   log.debug('calling fpm with args:', args);
