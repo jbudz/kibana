@@ -5,20 +5,6 @@ REMOVE_USER_AND_GROUP=false
 REMOVE_DIRS=false
 
 case $1 in
-  # Includes cases for all valid arguments, exit 1 otherwise
-  # Debian
-  purge)
-    REMOVE_USER_AND_GROUP=true
-    REMOVE_DIRS=true
-  ;;
-  remove)
-    REMOVE_DIRS=true
-  ;;
-
-  failed-upgrade|abort-install|abort-upgrade|disappear|upgrade|disappear)
-  ;;
-
-  # Red Hat
   0)
     REMOVE_USER_AND_GROUP=true
     REMOVE_DIRS=true
