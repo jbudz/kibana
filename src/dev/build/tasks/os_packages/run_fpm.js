@@ -79,9 +79,6 @@ export async function runFpm(config, log, build, type, pkgSpecificFlags) {
     '--after-install',
     resolve(__dirname, type, 'package_scripts/post_install.sh'),
 
-    '--before-install',
-    resolve(__dirname, type, 'package_scripts/pre_install.sh'),
-
     '--before-remove',
     resolve(__dirname, type, 'package_scripts/pre_remove.sh'),
 
