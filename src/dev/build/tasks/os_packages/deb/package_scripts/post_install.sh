@@ -25,11 +25,11 @@ sysv_target="/etc/init.d"
 if [ -d $systemd_target ] && then
   echo -n "Installing systemd service..."
   cp "<%= serviceDir %>/systemd/kibana.service" "$syv_target/kibana.service"
-  echo -n "done."
+  echo -n " OK"
 elif [ -d $sysv_target ]; then
   echo -n "Installing sysv service..."
   cp "<%= serviceDir %>/sysv/kibana" "$sysv_target/kibana"
-  echo -n "done."
+  echo -n " OK"
 else
   echo "No system service found, check <%= serviceDir %> to manually install."
 fi
