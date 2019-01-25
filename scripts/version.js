@@ -23,23 +23,28 @@ var program = require('commander');
 var semver = require('semver');
 var git = require('simple-git')();
 
-program.command('bump <version>').action(function (version) {
-  if (!semver.valid(version)) {
-    throw new Error('invalid version ' + version);
-  }
+function gitHandler(error, result) {
+  if (error) throw error;
+  if (result) console.log(result);
+}
+program
+  .command('bump <version>').action(function (version) {
+    if (!semver.valid(version)) {
+      throw new Error('invalid version ' + version);
+    }
 
-  [
-    path.resolve(__dirname, '../package.json'),
-    path.resolve(__dirname, '../x-pack/package.json'),
-    path.resolve(__dirname, '../x-pack/plugins/infra/package.json')
-  ].forEach(function (file) {
-    var content = JSON.parse(fs.readFileSync(file));
-    content.version = version;
-    fs.writeFileSync(file, JSON.stringify(content, null, 2) + '\n');
-    git.add(file);
+    [
+      path.resolve(__dirname, '../package.json'),
+      path.resolve(__dirname, '../x-pack/package.json'),
+      path.resolve(__dirname, '../x-pack/plugins/infra/package.json')
+    ].forEach(function (file) {
+      var content = JSON.parse(fs.readFileSync(file));
+      content.version = version;
+      fs.writeFileSync(file, JSON.stringify(content, null, 2) + '\n');
+      git.add(file, gitHandler);
+    });
+
+    git.commit('v' + version, gitHandler);
   });
-
-  git.commit('v' + version);
-});
 
 program.parse(process.argv);
