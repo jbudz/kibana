@@ -20,11 +20,12 @@
 // @ts-ignore
 import { fromExpression } from '@kbn/interpreter/common';
 // @ts-ignore
-import { getInterpreter } from 'plugins/interpreter/interpreter';
+// import { getInterpreter } from 'plugins/interpreter/interpreter';
 
 export const runPipeline = async (expression: string, context: any, handlers: any) => {
-  const ast = fromExpression(expression);
-  const { interpreter } = await getInterpreter();
-  const pipelineResponse = await interpreter.interpretAst(ast, context, handlers);
-  return pipelineResponse;
+  // const ast = fromExpression(expression);
+  // const { interpreter } = await getInterpreter();
+  // const pipelineResponse = await interpreter.interpretAst(ast, context, handlers);
+  // return pipelineResponse;
+  return {};
 };

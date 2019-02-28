@@ -177,6 +177,7 @@ export default () => Joi.object({
 
   optimize: Joi.object({
     enabled: Joi.boolean().default(true),
+    workflow: Joi.array().items(Joi.string()).default([]),
     bundleFilter: Joi.string().default('!tests'),
     bundleDir: Joi.string().default(fromRoot('optimize/bundles')),
     viewCaching: Joi.boolean().default(Joi.ref('$prod')),

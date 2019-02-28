@@ -128,6 +128,10 @@ export class PluginSpec {
     if (!config || typeof config.get !== 'function' || typeof config.has !== 'function') {
       throw new TypeError('PluginSpec#isEnabled() must be called with a config service');
     }
+    const workflow = config.get('optimize.workflow');
+    if (workflow.length) {
+      return workflow.includes(this.getId());
+    }
 
     if (this._isEnabled) {
       return this._isEnabled(config);

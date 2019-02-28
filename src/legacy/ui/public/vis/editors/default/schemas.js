@@ -35,9 +35,9 @@ class Schemas {
               default: true
             }
           ];
-          schema.editor = require('plugins/kbn_vislib_vis_types/controls/rows_or_columns.html');
+          // schema.editor = require('plugins/kbn_vislib_vis_types/controls/rows_or_columns.html');
         } else if (schema.name === 'radius') {
-          schema.editor = require('plugins/kbn_vislib_vis_types/controls/radius_ratio_option.html');
+          // schema.editor = require('plugins/kbn_vislib_vis_types/controls/radius_ratio_option.html');
         }
 
         _.defaults(schema, {
