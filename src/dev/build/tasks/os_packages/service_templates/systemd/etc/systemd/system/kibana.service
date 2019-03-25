@@ -1,7 +1,5 @@
 [Unit]
 Description=Kibana
-StartLimitIntervalSec=30
-StartLimitBurst=3
 
 [Service]
 Type=simple
@@ -14,6 +12,8 @@ EnvironmentFile=-/etc/default/kibana
 EnvironmentFile=-/etc/sysconfig/kibana
 ExecStart=/usr/share/kibana/bin/kibana "-c /etc/kibana/kibana.yml"
 Restart=always
+StartLimitInterval=30
+StartLimitBurst=3
 WorkingDirectory=/
 
 [Install]
