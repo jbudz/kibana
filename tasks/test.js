@@ -82,8 +82,6 @@ module.exports = function (grunt) {
     );
   });
 
-  grunt.registerTask('quick-test', ['test:quick']); // historical alias
-
   grunt.registerTask('test:projects', function () {
     const done = this.async();
     runProjectsTests().then(done, done);
