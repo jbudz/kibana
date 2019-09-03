@@ -18,7 +18,7 @@ By default, this will also set the password for native realm accounts to the pas
 ## Running specific tests
 | Test runner  | Test location                                                                       | Runner command (working directory is kibana/x-pack)                                     |
 | ------------ | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| Jest         | `x-pack/**/*.test.js`<br>`x-pack/**/*.test.ts`                                      | `cd x-pack && node scripts/jest -t regexp [test path]`                                     |
+| Jest         | `x-pack/**/*.test.js`<br>`x-pack/**/*.test.ts`                                      | `cd x-pack && yarn test:jest -t regexp [test path]`                                     |
 | Functional   | `x-pack/test/*integration/**/config.js`<br>`x-pack/test/*functional/config.js`      | `node scripts/functional_tests_server --config x-pack/test/[directory]/config.js`<br>`node scripts/functional_test_runner --config x-pack/test/[directory]/config.js --grep=regexp`       |
 
 Examples:
@@ -53,10 +53,10 @@ Initializes an environment for debugging the browser tests. Includes an dedicate
 Run single tests by appending `grep` parameter to the end of the URL. For example `http://localhost:9876/debug.html?grep=ML%20-%20Explorer%20Controller` will only run tests with 'ML - Explorer Controller' in the describe block.
 
 #### Running server unit tests
-You can run server-side unit tests by running:
+You can run mocha unit tests by running:
 
 ```
-yarn test:server
+yarn test:mocha
 ```
 
 #### Running functional tests

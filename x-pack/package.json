@@ -9,13 +9,11 @@
     "kbn:bootstrap": "node legacy/plugins/canvas/scripts/storybook --clean",
     "start": "gulp dev",
     "build": "gulp build",
-    "testonly": "gulp testonly",
     "test": "gulp test",
-    "test:browser:dev": "gulp testbrowser-dev",
-    "test:browser": "gulp testbrowser",
+    "test:karma:dev": "gulp testbrowser-dev",
+    "test:karma": "gulp testbrowser",
     "test:jest": "node scripts/jest",
-    "test:mocha": "node scripts/mocha",
-    "test:server": "gulp testserver"
+    "test:mocha": "gulp testserver"
   },
   "kibana": {
     "build": {
