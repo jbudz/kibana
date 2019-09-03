@@ -31,7 +31,7 @@ module.exports = function testBrowserAction(plugin, run, options) {
     kbnServerArgs.push('--kbnServer.tests_bundle.pluginId=' + plugin.id);
   }
 
-  const task = options.dev ? 'test:dev' : 'test:browser';
+  const task = options.dev ? 'test:karma:dev' : 'test:karma';
   const args = [task].concat(kbnServerArgs);
   execFileSync(winCmd('yarn'), args, {
     cwd: plugin.kibanaRoot,
