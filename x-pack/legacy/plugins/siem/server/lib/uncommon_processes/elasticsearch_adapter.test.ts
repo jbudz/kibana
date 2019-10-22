@@ -24,7 +24,6 @@ describe('elasticsearch_adapter', () => {
                 hits: [
                   {
                     _index: 'hit-1',
-                    _type: 'type-1',
                     _id: 'id-1',
                     _score: 0,
                     _source: {
@@ -64,7 +63,6 @@ describe('elasticsearch_adapter', () => {
                 hits: [
                   {
                     _index: 'hit-1',
-                    _type: 'type-1',
                     _id: 'id-1',
                     _score: 0,
                     _source: {
@@ -87,7 +85,6 @@ describe('elasticsearch_adapter', () => {
                 hits: [
                   {
                     _index: 'hit-2',
-                    _type: 'type-2',
                     _id: 'id-2',
                     _score: 0,
                     _source: {
@@ -127,7 +124,6 @@ describe('elasticsearch_adapter', () => {
                 hits: [
                   {
                     _index: 'hit-9',
-                    _type: 'type-9',
                     _id: 'id-9',
                     _score: 0,
                     _source: {
@@ -178,7 +174,6 @@ describe('elasticsearch_adapter', () => {
   describe('#formatUncommonProcessesData', () => {
     const hit: UncommonProcessHit = {
       _index: 'index-123',
-      _type: 'type-123',
       _id: 'id-123',
       _score: 10,
       total: {

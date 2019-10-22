@@ -97,7 +97,6 @@ export default ({ getService }: FtrProviderContext) => {
         .valueOf();
       await es.index({
         index: '.kibana',
-        type: '_doc',
         body: {
           type: 'lens-ui-telemetry',
           'lens-ui-telemetry': {

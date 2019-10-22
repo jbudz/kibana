@@ -39,7 +39,7 @@ const recordsToBulkBody = records => {
 
     return [
       ...acc,
-      { index: { _index: index, _type: type, _id: id } },
+      { index: { _index: index, _id: id } },
       source
     ];
   }, []);

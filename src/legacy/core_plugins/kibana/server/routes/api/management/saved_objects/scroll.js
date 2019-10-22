@@ -56,7 +56,6 @@ export function registerScrollForExportRoute(server) {
         const type = hit.type;
         return {
           _id: hit.id,
-          _type: type,
           _source: hit.attributes,
           _meta: {
             savedObjectVersion: 2
