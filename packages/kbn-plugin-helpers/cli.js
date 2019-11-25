@@ -66,7 +66,7 @@ program
   .action(createCommanderAction('testAll'));
 
 program
-  .command('test:browser')
+  .command('test:karma')
   .description('Run the browser tests in a real web browser')
   .option('--dev', 'Enable dev mode, keeps the test server running')
   .option('-p, --plugins <plugin-ids>', "Manually specify which plugins' test bundles to run")
@@ -79,7 +79,7 @@ program
   );
 
 program
-  .command('test:server [files...]')
+  .command('test:mocha [files...]')
   .description('Run the server tests using mocha')
   .on('--help', docs('test/server'))
   .action(
