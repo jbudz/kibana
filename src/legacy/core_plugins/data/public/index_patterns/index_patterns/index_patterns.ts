@@ -24,18 +24,14 @@ import {
   UiSettingsClientContract,
   HttpServiceBase,
 } from 'src/core/public';
-// @ts-ignore
-import { fieldFormats } from 'ui/registry/field_formats';
 
 import { createIndexPatternCache } from './_pattern_cache';
 import { IndexPattern } from './index_pattern';
-import { IndexPatternsApiClient } from './index_patterns_api_client';
+import { IndexPatternsApiClient, GetFieldsOptions } from './index_patterns_api_client';
 
 const indexPatternCache = createIndexPatternCache();
 
 export class IndexPatterns {
-  fieldFormats: fieldFormats;
-
   private config: UiSettingsClientContract;
   private savedObjectsClient: SavedObjectsClientContract;
   private savedObjectsCache?: Array<SimpleSavedObject<Record<string, any>>> | null;
@@ -47,17 +43,18 @@ export class IndexPatterns {
     http: HttpServiceBase
   ) {
     this.apiClient = new IndexPatternsApiClient(http);
-
     this.config = config;
     this.savedObjectsClient = savedObjectsClient;
   }
 
   private async refreshSavedObjectsCache() {
-    this.savedObjectsCache = (await this.savedObjectsClient.find({
-      type: 'index-pattern',
-      fields: [],
-      perPage: 10000,
-    })).savedObjects;
+    this.savedObjectsCache = (
+      await this.savedObjectsClient.find({
+        type: 'index-pattern',
+        fields: [],
+        perPage: 10000,
+      })
+    ).savedObjects;
   }
 
   getIds = async (refresh: boolean = false) => {
@@ -94,6 +91,14 @@ export class IndexPatterns {
     });
   };
 
+  getFieldsForTimePattern = (options: GetFieldsOptions = {}) => {
+    return this.apiClient.getFieldsForTimePattern(options);
+  };
+
+  getFieldsForWildcard = (options: GetFieldsOptions = {}) => {
+    return this.apiClient.getFieldsForWildcard(options);
+  };
+
   clearCache = (id?: string) => {
     this.savedObjectsCache = null;
     if (id) {
@@ -101,6 +106,12 @@ export class IndexPatterns {
     } else {
       indexPatternCache.clearAll();
     }
+  };
+  getCache = async () => {
+    if (!this.savedObjectsCache) {
+      await this.refreshSavedObjectsCache();
+    }
+    return this.savedObjectsCache;
   };
 
   getDefault = async () => {
@@ -112,18 +123,26 @@ export class IndexPatterns {
     return null;
   };
 
-  get = (id: string) => {
+  get = async (id: string): Promise<IndexPattern> => {
     const cache = indexPatternCache.get(id);
-    return cache || indexPatternCache.set(id, this.make(id));
+    if (cache) {
+      return cache;
+    }
+
+    const indexPattern = await this.make(id);
+
+    return indexPatternCache.set(id, indexPattern);
   };
 
   make = (id?: string): Promise<IndexPattern> => {
-    return new IndexPattern(
+    const indexPattern = new IndexPattern(
       id,
       (cfg: any) => this.config.get(cfg),
       this.savedObjectsClient,
       this.apiClient,
       indexPatternCache
-    ).init();
+    );
+
+    return indexPattern.init();
   };
 }

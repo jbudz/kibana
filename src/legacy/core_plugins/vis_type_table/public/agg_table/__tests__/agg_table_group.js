@@ -23,20 +23,14 @@ import expect from '@kbn/expect';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import { legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { VisProvider } from 'ui/vis';
+import { Vis } from 'ui/vis';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
-
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { createTableVisTypeDefinition } from '../../table_vis_type';
-import { setup as visualizationsSetup } from '../../../../visualizations/public/legacy';
 
 describe('Table Vis - AggTableGroup Directive', function () {
   let $rootScope;
   let $compile;
-  let Vis;
   let indexPattern;
   let tableAggResponse;
-  let legacyDependencies;
   const tabifiedData = {};
 
   const init = () => {
@@ -61,16 +55,19 @@ describe('Table Vis - AggTableGroup Directive', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(
     ngMock.inject(function ($injector, Private) {
+      // this is provided in table_vis_controller.js
+      // tech debt that will be resolved through further deangularization and moving tests to jest
+      /*
       legacyDependencies = {
         // eslint-disable-next-line new-cap
         createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization,
       };
 
       visualizationsSetup.types.registerVisualization(() => createTableVisTypeDefinition(legacyDependencies));
+      */
 
       tableAggResponse = legacyResponseHandlerProvider().handler;
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-      Vis = Private(VisProvider);
 
       $rootScope = $injector.get('$rootScope');
       $compile = $injector.get('$compile');

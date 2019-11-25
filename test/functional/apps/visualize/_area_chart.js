@@ -30,8 +30,6 @@ export default function ({ getService, getPageObjects }) {
     const vizName1 = 'Visualization AreaChart Name Test';
 
     const initAreaChart = async () => {
-      const fromTime = '2015-09-19 06:31:44.000';
-      const toTime = '2015-09-23 18:31:44.000';
 
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
@@ -39,7 +37,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickAreaChart();
       log.debug('clickNewSearch');
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
       log.debug('Click X-axis');
       await PageObjects.visualize.clickBucket('X-axis');
       log.debug('Click Date Histogram');
@@ -136,7 +134,39 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('axis scaling', () => {
-      it('scales count agg', async () => {
+      it('does not scale by default', async () => {
+        const expectedTableData = [
+          [ '2015-09-20 00:00', '6' ],
+          [ '2015-09-20 01:00', '9' ],
+          [ '2015-09-20 02:00', '22' ],
+          [ '2015-09-20 03:00', '31' ],
+          [ '2015-09-20 04:00', '52' ],
+          [ '2015-09-20 05:00', '119' ],
+          [ '2015-09-20 06:00', '181' ],
+          [ '2015-09-20 07:00', '218' ],
+          [ '2015-09-20 08:00', '341' ],
+          [ '2015-09-20 09:00', '440' ],
+          [ '2015-09-20 10:00', '480' ],
+          [ '2015-09-20 11:00', '517' ],
+          [ '2015-09-20 12:00', '522' ],
+          [ '2015-09-20 13:00', '446' ],
+          [ '2015-09-20 14:00', '403' ],
+          [ '2015-09-20 15:00', '321' ],
+          [ '2015-09-20 16:00', '258' ],
+          [ '2015-09-20 17:00', '172' ],
+          [ '2015-09-20 18:00', '95' ],
+          [ '2015-09-20 19:00', '55' ],
+        ];
+
+        await PageObjects.visualize.toggleOpenEditor(2);
+        await PageObjects.visualize.setInterval('Second');
+        await PageObjects.visualize.clickGo();
+        await inspector.open();
+        await inspector.expectTableData(expectedTableData);
+        await inspector.close();
+      });
+
+      it('scales when enabled count agg', async () => {
         const expectedTableData = [
           [ '2015-09-20 00:00', '0.002' ],
           [ '2015-09-20 01:00', '0.003' ],
@@ -160,9 +190,8 @@ export default function ({ getService, getPageObjects }) {
           [ '2015-09-20 19:00', '0.015' ],
         ];
 
-        await PageObjects.visualize.toggleOpenEditor(2);
-        await PageObjects.visualize.setInterval('Second');
-        await PageObjects.visualize.toggleOpenEditor(2, 'false');
+        await PageObjects.visualize.toggleAdvancedParams('2');
+        await PageObjects.visualize.toggleScaleMetrics();
         await PageObjects.visualize.clickGo();
         await inspector.open();
         await inspector.expectTableData(expectedTableData);
@@ -296,8 +325,8 @@ export default function ({ getService, getPageObjects }) {
     });
     describe('date histogram with long time range', () => {
       // that dataset spans from Oct 26, 2013 @ 06:10:17.855	to Apr 18, 2019 @ 11:38:12.790
-      const fromTime = '2013-01-01 00:00:00.000';
-      const toTime = '2020-01-01 00:00:00.000';
+      const fromTime = 'Jan 1, 2013 @ 00:00:00.000';
+      const toTime = 'Jan 1, 2020 @ 00:00:00.000';
       it('should render a yearly area with 12 svg paths', async () => {
         log.debug('navigateToApp visualize');
         await PageObjects.visualize.navigateToNewVisualization();

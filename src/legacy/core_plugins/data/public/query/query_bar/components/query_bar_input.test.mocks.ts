@@ -41,19 +41,15 @@ export const mockPersistedLogFactory = jest.fn<jest.Mocked<typeof mockPersistedL
   return mockPersistedLog;
 });
 
-export const mockGetAutocompleteSuggestions = jest.fn(() => Promise.resolve([]));
-const mockAutocompleteProvider = jest.fn(() => mockGetAutocompleteSuggestions);
-export const mockGetAutocompleteProvider = jest.fn(() => mockAutocompleteProvider);
-
 export const mockFetchIndexPatterns = jest
   .fn()
   .mockReturnValue(Promise.resolve([mockIndexPattern]));
 
-jest.mock('ui/persisted_log', () => ({
+jest.mock('../../../../../../../plugins/data/public/query/persisted_log', () => ({
   PersistedLog: mockPersistedLogFactory,
 }));
 
-jest.mock('../lib/fetch_index_patterns', () => ({
+jest.mock('./fetch_index_patterns', () => ({
   fetchIndexPatterns: mockFetchIndexPatterns,
 }));
 

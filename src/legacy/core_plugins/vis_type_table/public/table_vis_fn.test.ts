@@ -19,20 +19,25 @@
 
 import { createTableVisFn } from './table_vis_fn';
 
-// @ts-ignore
-import { functionWrapper } from '../../interpreter/test_helpers';
+// eslint-disable-next-line
+import { functionWrapper } from '../../../../plugins/expressions/public/functions/tests/utils';
 
 jest.mock('ui/new_platform');
 
-const mockResponseHandler = jest.fn().mockReturnValue(
-  Promise.resolve({
-    tables: [{ columns: [], rows: [] }],
-  })
-);
+jest.mock('ui/vis/response_handlers/legacy', () => {
+  const mockResponseHandler = jest.fn().mockReturnValue(
+    Promise.resolve({
+      tables: [{ columns: [], rows: [] }],
+    })
+  );
 
-jest.mock('ui/vis/response_handlers/legacy', () => ({
-  legacyResponseHandlerProvider: () => ({ handler: mockResponseHandler }),
-}));
+  return {
+    mockResponseHandler,
+    legacyResponseHandlerProvider: () => ({ handler: mockResponseHandler }),
+  };
+});
+
+const { mockResponseHandler } = jest.requireMock('ui/vis/response_handlers/legacy');
 
 describe('interpreter/functions#table', () => {
   const fn = functionWrapper(createTableVisFn);
@@ -71,12 +76,12 @@ describe('interpreter/functions#table', () => {
   });
 
   it('returns an object with the correct structure', async () => {
-    const actual = await fn(context, { visConfig: JSON.stringify(visConfig) });
+    const actual = await fn(context, { visConfig: JSON.stringify(visConfig) }, undefined);
     expect(actual).toMatchSnapshot();
   });
 
   it('calls response handler with correct values', async () => {
-    await fn(context, { visConfig: JSON.stringify(visConfig) });
+    await fn(context, { visConfig: JSON.stringify(visConfig) }, undefined);
     expect(mockResponseHandler).toHaveBeenCalledTimes(1);
     expect(mockResponseHandler).toHaveBeenCalledWith(context, visConfig.dimensions);
   });

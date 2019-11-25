@@ -21,11 +21,15 @@ import {
   UiSettingsClientContract,
   SavedObjectsClientContract,
   HttpServiceBase,
+  NotificationsStart,
 } from 'src/core/public';
-import { Field, FieldList, FieldType } from './fields';
-import { createFlattenHitWrapper } from './index_patterns';
+import { FieldFormatsStart } from '../../../../../plugins/data/public';
+import { Field, FieldList, FieldListInterface, FieldType } from './fields';
 import { createIndexPatternSelect } from './components';
+import { setNotifications, setFieldFormats } from './services';
+
 import {
+  createFlattenHitWrapper,
   formatHitProvider,
   IndexPattern,
   IndexPatterns,
@@ -36,6 +40,8 @@ export interface IndexPatternDependencies {
   uiSettings: UiSettingsClientContract;
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpServiceBase;
+  notifications: NotificationsStart;
+  fieldFormats: FieldFormatsStart;
 }
 
 /**
@@ -44,23 +50,37 @@ export interface IndexPatternDependencies {
  * @internal
  */
 export class IndexPatternsService {
-  public setup({ uiSettings, savedObjectsClient, http }: IndexPatternDependencies) {
-    return {
+  private setupApi: any;
+
+  public setup() {
+    this.setupApi = {
       FieldList,
       flattenHitWrapper: createFlattenHitWrapper(),
       formatHitProvider,
-      indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient, http),
-      IndexPatternSelect: createIndexPatternSelect(savedObjectsClient),
       __LEGACY: {
         // For BWC we must temporarily export the class implementation of Field,
         // which is only used externally by the Index Pattern UI.
         FieldImpl: Field,
       },
     };
+    return this.setupApi;
   }
 
-  public start() {
-    // nothing to do here yet
+  public start({
+    uiSettings,
+    savedObjectsClient,
+    http,
+    notifications,
+    fieldFormats,
+  }: IndexPatternDependencies) {
+    setNotifications(notifications);
+    setFieldFormats(fieldFormats);
+
+    return {
+      ...this.setupApi,
+      indexPatterns: new IndexPatterns(uiSettings, savedObjectsClient, http),
+      IndexPatternSelect: createIndexPatternSelect(savedObjectsClient),
+    };
   }
 
   public stop() {
@@ -79,10 +99,7 @@ export {
   ILLEGAL_CHARACTERS,
   INDEX_PATTERN_ILLEGAL_CHARACTERS,
   INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-  isFilterable,
   validateIndexPattern,
-  mockFields,
-  mockIndexPattern,
 } from './utils';
 
 /** @public */
@@ -97,18 +114,10 @@ export {
 
 /** @internal */
 export type IndexPatternsSetup = ReturnType<IndexPatternsService['setup']>;
+export type IndexPatternsStart = ReturnType<IndexPatternsService['start']>;
 
 /** @public */
-export type IndexPattern = IndexPattern;
+export { IndexPattern, IndexPatterns, StaticIndexPattern, Field, FieldType, FieldListInterface };
 
 /** @public */
-export type IndexPatterns = IndexPatterns;
-
-/** @public */
-export type StaticIndexPattern = StaticIndexPattern;
-
-/** @public */
-export type Field = Field;
-
-/** @public */
-export type FieldType = FieldType;
+export { getIndexPatternTitle, findIndexPatternByTitle } from './utils';

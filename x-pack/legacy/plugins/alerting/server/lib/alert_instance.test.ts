@@ -18,9 +18,17 @@ afterAll(() => clock.restore());
 describe('hasScheduledActions()', () => {
   test('defaults to false', () => {
     const alertInstance = new AlertInstance();
-    expect(alertInstance.hasScheduledActions(null)).toEqual(false);
+    expect(alertInstance.hasScheduledActions()).toEqual(false);
   });
 
+  test('returns true when scheduleActions is called', () => {
+    const alertInstance = new AlertInstance();
+    alertInstance.scheduleActions('default');
+    expect(alertInstance.hasScheduledActions()).toEqual(true);
+  });
+});
+
+describe('isThrottled', () => {
   test(`should throttle when group didn't change and throttle period is still active`, () => {
     const alertInstance = new AlertInstance({
       meta: {
@@ -32,7 +40,7 @@ describe('hasScheduledActions()', () => {
     });
     clock.tick(30000);
     alertInstance.scheduleActions('default');
-    expect(alertInstance.hasScheduledActions('1m')).toEqual(false);
+    expect(alertInstance.isThrottled('1m')).toEqual(true);
   });
 
   test(`shouldn't throttle when group didn't change and throttle period expired`, () => {
@@ -46,7 +54,7 @@ describe('hasScheduledActions()', () => {
     });
     clock.tick(30000);
     alertInstance.scheduleActions('default');
-    expect(alertInstance.hasScheduledActions('15s')).toEqual(true);
+    expect(alertInstance.isThrottled('15s')).toEqual(false);
   });
 
   test(`shouldn't throttle when group changes`, () => {
@@ -60,14 +68,14 @@ describe('hasScheduledActions()', () => {
     });
     clock.tick(5000);
     alertInstance.scheduleActions('other-group');
-    expect(alertInstance.hasScheduledActions('1m')).toEqual(true);
+    expect(alertInstance.isThrottled('1m')).toEqual(false);
   });
 });
 
-describe('getSechduledActionOptions()', () => {
+describe('getScheduledActionOptions()', () => {
   test('defaults to undefined', () => {
     const alertInstance = new AlertInstance();
-    expect(alertInstance.getSechduledActionOptions()).toBeUndefined();
+    expect(alertInstance.getScheduledActionOptions()).toBeUndefined();
   });
 });
 
@@ -75,21 +83,21 @@ describe('unscheduleActions()', () => {
   test('makes hasScheduledActions() return false', () => {
     const alertInstance = new AlertInstance();
     alertInstance.scheduleActions('default');
-    expect(alertInstance.hasScheduledActions(null)).toEqual(true);
+    expect(alertInstance.hasScheduledActions()).toEqual(true);
     alertInstance.unscheduleActions();
-    expect(alertInstance.hasScheduledActions(null)).toEqual(false);
+    expect(alertInstance.hasScheduledActions()).toEqual(false);
   });
 
-  test('makes getSechduledActionOptions() return undefined', () => {
+  test('makes getScheduledActionOptions() return undefined', () => {
     const alertInstance = new AlertInstance();
     alertInstance.scheduleActions('default');
-    expect(alertInstance.getSechduledActionOptions()).toEqual({
+    expect(alertInstance.getScheduledActionOptions()).toEqual({
       actionGroup: 'default',
       context: {},
       state: {},
     });
     alertInstance.unscheduleActions();
-    expect(alertInstance.getSechduledActionOptions()).toBeUndefined();
+    expect(alertInstance.getScheduledActionOptions()).toBeUndefined();
   });
 });
 
@@ -113,10 +121,10 @@ describe('scheduleActions()', () => {
       },
     });
     alertInstance.replaceState({ otherField: true }).scheduleActions('default', { field: true });
-    expect(alertInstance.hasScheduledActions(null)).toEqual(true);
+    expect(alertInstance.hasScheduledActions()).toEqual(true);
   });
 
-  test('makes hasScheduledActions() return false when throttled', () => {
+  test('makes isThrottled() return true when throttled', () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
       meta: {
@@ -127,10 +135,10 @@ describe('scheduleActions()', () => {
       },
     });
     alertInstance.replaceState({ otherField: true }).scheduleActions('default', { field: true });
-    expect(alertInstance.hasScheduledActions('1m')).toEqual(false);
+    expect(alertInstance.isThrottled('1m')).toEqual(true);
   });
 
-  test('make hasScheduledActions() return true when throttled expired', () => {
+  test('make isThrottled() return false when throttled expired', () => {
     const alertInstance = new AlertInstance({
       state: { foo: true },
       meta: {
@@ -142,13 +150,13 @@ describe('scheduleActions()', () => {
     });
     clock.tick(120000);
     alertInstance.replaceState({ otherField: true }).scheduleActions('default', { field: true });
-    expect(alertInstance.hasScheduledActions('1m')).toEqual(true);
+    expect(alertInstance.isThrottled('1m')).toEqual(false);
   });
 
-  test('makes getSechduledActionOptions() return given options', () => {
+  test('makes getScheduledActionOptions() return given options', () => {
     const alertInstance = new AlertInstance({ state: { foo: true }, meta: {} });
     alertInstance.replaceState({ otherField: true }).scheduleActions('default', { field: true });
-    expect(alertInstance.getSechduledActionOptions()).toEqual({
+    expect(alertInstance.getScheduledActionOptions()).toEqual({
       actionGroup: 'default',
       context: { field: true },
       state: { otherField: true },

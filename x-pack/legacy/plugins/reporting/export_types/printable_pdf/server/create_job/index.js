@@ -5,11 +5,12 @@
  */
 
 import { PLUGIN_ID, PDF_JOB_TYPE } from '../../../../common/constants';
-import { LevelLogger, oncePerServer } from '../../../../server/lib';
+import { validateUrls } from '../../../../common/validate_urls';
+import { LevelLogger } from '../../../../server/lib';
 import { cryptoFactory } from '../../../../server/lib/crypto';
 import { compatibilityShimFactory } from './compatibility_shim';
 
-function createJobFactoryFn(server) {
+export function createJobFactory(server) {
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, PDF_JOB_TYPE, 'create']);
   const compatibilityShim = compatibilityShimFactory(server, logger);
   const crypto = cryptoFactory(server);
@@ -20,6 +21,8 @@ function createJobFactoryFn(server) {
     request
   ) {
     const serializedEncryptedHeaders = await crypto.encrypt(headers);
+
+    validateUrls(relativeUrls);
 
     return {
       type: objectType, // Note: this changes the shape of the job params object
@@ -33,5 +36,3 @@ function createJobFactoryFn(server) {
     };
   });
 }
-
-export const createJobFactory = oncePerServer(createJobFactoryFn);

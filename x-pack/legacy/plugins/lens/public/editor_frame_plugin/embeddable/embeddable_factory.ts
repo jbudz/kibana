@@ -10,7 +10,7 @@ import { Chrome } from 'ui/chrome';
 import { capabilities } from 'ui/capabilities';
 import { i18n } from '@kbn/i18n';
 import { IndexPatterns, IndexPattern } from 'src/legacy/core_plugins/data/public';
-import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/expressions/public';
+import { ExpressionRenderer } from '../../../../../../../src/plugins/expressions/public';
 import {
   EmbeddableFactory as AbstractEmbeddableFactory,
   ErrorEmbeddable,
@@ -39,7 +39,7 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
           defaultMessage: 'Lens Visualization',
         }),
         type: DOC_TYPE,
-        getIconForSavedObject: () => 'faceHappy',
+        getIconForSavedObject: () => 'lensApp',
       },
     });
     this.chrome = chrome;
@@ -48,7 +48,7 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
   }
 
   public isEditable() {
-    return capabilities.get().lens.save as boolean;
+    return capabilities.get().visualize.save as boolean;
   }
 
   canCreateNew() {
@@ -81,8 +81,10 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
         }
       }
     );
-    const indexPatterns = (await Promise.all(promises)).filter(
-      (indexPattern: IndexPattern | null): indexPattern is IndexPattern => Boolean(indexPattern)
+    const indexPatterns = (
+      await Promise.all(promises)
+    ).filter((indexPattern: IndexPattern | null): indexPattern is IndexPattern =>
+      Boolean(indexPattern)
     );
 
     return new Embeddable(

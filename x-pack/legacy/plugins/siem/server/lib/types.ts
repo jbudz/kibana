@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Anomalies } from './anomalies';
 import { Authentications } from './authentications';
 import { ConfigurationAdapter } from './configuration';
 import { Events } from './events';
@@ -21,10 +22,13 @@ import { UncommonProcesses } from './uncommon_processes';
 import { Note } from './note/saved_object';
 import { PinnedEvent } from './pinned_event/saved_object';
 import { Timeline } from './timeline/saved_object';
+import { TLS } from './tls';
+import { SignalAlertParamsRest } from './detection_engine/alerts/types';
 
 export * from './hosts';
 
 export interface AppDomainLibs {
+  anomalies: Anomalies;
   authentications: Authentications;
   events: Events;
   fields: IndexFields;
@@ -35,6 +39,7 @@ export interface AppDomainLibs {
   overview: Overview;
   uncommonProcesses: UncommonProcesses;
   kpiHosts: KpiHosts;
+  tls: TLS;
 }
 
 export interface AppBackendLibs extends AppDomainLibs {
@@ -58,6 +63,22 @@ export interface Configuration {
 
 export interface SiemContext {
   req: FrameworkRequest;
+}
+
+export interface Signal {
+  rule: Partial<SignalAlertParamsRest>;
+  parent: {
+    id: string;
+    type: string;
+    index: string;
+    depth: number;
+  };
+  original_time: string;
+}
+
+export interface SignalHit {
+  '@timestamp': string;
+  signal: Partial<Signal>;
 }
 
 export interface TotalValue {
@@ -168,6 +189,17 @@ export interface AggregationRequest {
         [aggType: string]: {
           field: string;
         };
+      };
+    };
+    top_hits?: {
+      size?: number;
+      sort?: Array<{
+        [aggSortField: string]: {
+          order: SortRequestDirection;
+        };
+      }>;
+      _source: {
+        includes: string[];
       };
     };
   };

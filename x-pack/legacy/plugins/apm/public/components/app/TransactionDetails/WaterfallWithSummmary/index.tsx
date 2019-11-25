@@ -25,7 +25,7 @@ import { TransactionActionMenu } from '../../../shared/TransactionActionMenu/Tra
 import { TransactionTabs } from './TransactionTabs';
 import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
-import { TraceSummary } from './TraceSummary/TraceSummary';
+import { TransactionSummary } from '../../../shared/Summary/TransactionSummary';
 
 function MaybeViewTraceLink({
   transaction,
@@ -110,7 +110,7 @@ interface Props {
   isLoading: boolean;
 }
 
-export const WaterfallWithSummmary: React.SFC<Props> = ({
+export const WaterfallWithSummmary: React.FC<Props> = ({
   urlParams,
   location,
   waterfall,
@@ -165,7 +165,7 @@ export const WaterfallWithSummmary: React.SFC<Props> = ({
 
       <EuiSpacer size="s" />
 
-      <TraceSummary
+      <TransactionSummary
         errorCount={sum(Object.values(waterfall.errorCountByTransactionId))}
         totalDuration={waterfall.traceRootDuration}
         transaction={entryTransaction}

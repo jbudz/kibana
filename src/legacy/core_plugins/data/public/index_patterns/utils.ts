@@ -17,12 +17,9 @@
  * under the License.
  */
 
-// @ts-ignore
-import { get } from 'lodash';
-// @ts-ignore
-import { KBN_FIELD_TYPES } from '../../../../utils/kbn_field_types';
-import { Field, FieldType } from './fields';
-import { StaticIndexPattern } from './index_patterns';
+import { find, get } from 'lodash';
+
+import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
 
 export const ILLEGAL_CHARACTERS = 'ILLEGAL_CHARACTERS';
 export const CONTAINS_SPACES = 'CONTAINS_SPACES';
@@ -45,6 +42,48 @@ function findIllegalCharacters(indexPattern: string): string[] {
   return illegalCharacters;
 }
 
+/**
+ * Returns an object matching a given title
+ *
+ * @param client {SavedObjectsClientContract}
+ * @param title {string}
+ * @returns {Promise<SimpleSavedObject|undefined>}
+ */
+export async function findIndexPatternByTitle(
+  client: SavedObjectsClientContract,
+  title: string
+): Promise<SimpleSavedObject<any> | void> {
+  if (!title) {
+    return Promise.resolve();
+  }
+
+  const { savedObjects } = await client.find({
+    type: 'index-pattern',
+    perPage: 10,
+    search: `"${title}"`,
+    searchFields: ['title'],
+    fields: ['title'],
+  });
+
+  return find(
+    savedObjects,
+    (obj: SimpleSavedObject<any>) => obj.get('title').toLowerCase() === title.toLowerCase()
+  );
+}
+
+export async function getIndexPatternTitle(
+  client: SavedObjectsClientContract,
+  indexPatternId: string
+): Promise<SimpleSavedObject<any>> {
+  const savedObject = (await client.get('index-pattern', indexPatternId)) as SimpleSavedObject<any>;
+
+  if (savedObject.error) {
+    throw new Error(`Unable to get index-pattern title: ${savedObject.error.message}`);
+  }
+
+  return savedObject.attributes.title;
+}
+
 function indexPatternContainsSpaces(indexPattern: string): boolean {
   return indexPattern.includes(' ');
 }
@@ -63,18 +102,6 @@ export function validateIndexPattern(indexPattern: string) {
   }
 
   return errors;
-}
-
-const filterableTypes = KBN_FIELD_TYPES.filter((type: any) => type.filterable).map(
-  (type: any) => type.name
-);
-
-export function isFilterable(field: Field): boolean {
-  return (
-    field.name === '_id' ||
-    field.scripted ||
-    (field.searchable && filterableTypes.includes(field.type))
-  );
 }
 
 export function getFromSavedObject(savedObject: any) {
@@ -98,69 +125,3 @@ export function getRoutes() {
     sourceFilters: '/management/kibana/index_patterns/{{id}}?_a=(tab:sourceFilters)',
   };
 }
-
-export const mockFields: FieldType[] = [
-  {
-    name: 'machine.os',
-    esTypes: ['text'],
-    type: 'string',
-    aggregatable: false,
-    searchable: false,
-    filterable: true,
-  },
-  {
-    name: 'machine.os.raw',
-    type: 'string',
-    esTypes: ['keyword'],
-    aggregatable: true,
-    searchable: true,
-    filterable: true,
-  },
-  {
-    name: 'not.filterable',
-    type: 'string',
-    esTypes: ['text'],
-    aggregatable: true,
-    searchable: false,
-    filterable: false,
-  },
-  {
-    name: 'bytes',
-    type: 'number',
-    esTypes: ['long'],
-    aggregatable: true,
-    searchable: true,
-    filterable: true,
-  },
-  {
-    name: '@timestamp',
-    type: 'date',
-    esTypes: ['date'],
-    aggregatable: true,
-    searchable: true,
-    filterable: true,
-  },
-  {
-    name: 'clientip',
-    type: 'ip',
-    esTypes: ['ip'],
-    aggregatable: true,
-    searchable: true,
-    filterable: true,
-  },
-  {
-    name: 'bool.field',
-    type: 'boolean',
-    esTypes: ['boolean'],
-    aggregatable: true,
-    searchable: true,
-    filterable: true,
-  },
-];
-
-export const mockIndexPattern: StaticIndexPattern = {
-  id: 'logstash-*',
-  fields: mockFields,
-  title: 'logstash-*',
-  timeFieldName: '@timestamp',
-};

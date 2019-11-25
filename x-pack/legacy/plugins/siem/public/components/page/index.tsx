@@ -5,12 +5,19 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiBadgeProps, EuiFlexGroup, EuiIcon, EuiPage } from '@elastic/eui';
-import styled, { injectGlobal } from 'styled-components';
+import {
+  EuiBadge,
+  EuiBadgeProps,
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiIcon,
+  EuiPage,
+} from '@elastic/eui';
+import styled, { createGlobalStyle } from 'styled-components';
 
-// SIDE EFFECT: the following `injectGlobal` overrides default styling in angular code that was not theme-friendly
+// SIDE EFFECT: the following `createGlobalStyle` overrides default styling in angular code that was not theme-friendly
 // eslint-disable-next-line no-unused-expressions
-injectGlobal`
+createGlobalStyle`
   div.app-wrapper {
     background-color: rgba(0,0,0,0);
   }
@@ -19,6 +26,22 @@ injectGlobal`
     background-color: rgba(0,0,0,0);
   }
 `;
+
+export const DescriptionListStyled = styled(EuiDescriptionList)`
+  ${({ theme }) => `
+    dt {
+      font-size: ${theme.eui.euiFontSizeXS} !important;
+    }
+    dd {
+      width: fit-content;
+    }
+    dd > div {
+      width: fit-content;
+    }
+  `}
+`;
+
+DescriptionListStyled.displayName = 'DescriptionListStyled';
 
 export const PageContainer = styled.div`
   display: flex;

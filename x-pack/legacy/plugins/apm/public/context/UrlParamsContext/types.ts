@@ -5,6 +5,7 @@
  */
 
 import { LocalUIFilterName } from '../../../server/lib/ui_filters/local_ui_filters/config';
+import { ProcessorEvent } from '../../../common/processor_event';
 
 export type IUrlParams = {
   detailTab?: string;
@@ -28,4 +29,7 @@ export type IUrlParams = {
   waterfallItemId?: string;
   page?: number;
   pageSize?: number;
+  serviceNodeName?: string;
+  searchTerm?: string;
+  processorEvent?: ProcessorEvent;
 } & Partial<Record<LocalUIFilterName, string>>;
