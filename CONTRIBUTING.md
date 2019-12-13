@@ -484,13 +484,13 @@ You could also add the `--debug` option so that `node` is run using the `--debug
 node scripts/mocha --debug <file>
 ```
 
-With `yarn test:browser`, you can run only the browser tests. Coverage reports are available for browser tests by running `yarn test:coverage`. You can find the results under the `coverage/` directory that will be created upon completion.
+With `yarn test:karma`, you can run only the browser tests. Coverage reports are available for browser tests by running `yarn test:coverage`. You can find the results under the `coverage/` directory that will be created upon completion.
 
 ```bash
 yarn test:karma
 ```
 
-Using `yarn test:karma:dev` initializes an environment for debugging the browser tests. Includes an dedicated instance of the kibana server for building the test bundle, and a karma server. When running this task the build is optimized for the first time and then a karma-owned instance of the browser is opened. Click the "debug" button to open a new tab that executes the unit tests.
+Using `yarn test:karma:debug` initializes an environment for debugging the browser tests. Includes an dedicated instance of the kibana server for building the test bundle, and a karma server. When running this task the build is optimized for the first time and then a karma-owned instance of the browser is opened. Click the "debug" button to open a new tab that executes the unit tests.
 
 ```bash
 yarn test:dev

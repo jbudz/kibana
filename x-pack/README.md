@@ -46,7 +46,7 @@ yarn test --plugins <plugin>[,<plugin>]*    # where <plugin> is "reporting", etc
 
 #### Debugging browser tests
 ```
-yarn test:browser:dev
+yarn test:karma:debug
 ```
 Initializes an environment for debugging the browser tests. Includes an dedicated instance of the kibana server for building the test bundle, and a karma server. When running this task the build is optimized for the first time and then a karma-owned instance of the browser is opened. Click the "debug" button to open a new tab that executes the unit tests.
 

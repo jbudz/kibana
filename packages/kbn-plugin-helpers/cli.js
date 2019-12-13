@@ -72,7 +72,7 @@ program
   .option('-p, --plugins <plugin-ids>', "Manually specify which plugins' test bundles to run")
   .on('--help', docs('test/browser'))
   .action(
-    createCommanderAction('testBrowser', command => ({
+    createCommanderAction('testKarma', command => ({
       dev: Boolean(command.dev),
       plugins: command.plugins,
     }))
@@ -83,7 +83,7 @@ program
   .description('Run the server tests using mocha')
   .on('--help', docs('test/server'))
   .action(
-    createCommanderAction('testServer', (command, files) => ({
+    createCommanderAction('testMocha', (command, files) => ({
       files: files,
     }))
   );

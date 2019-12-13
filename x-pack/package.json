@@ -10,8 +10,8 @@
     "start": "gulp dev",
     "build": "gulp build",
     "test": "gulp test",
-    "test:karma:dev": "gulp testbrowser-dev",
-    "test:karma": "gulp testbrowser",
+    "test:karma:debug": "gulp test:karma:debug",
+    "test:karma": "gulp test:karma",
     "test:jest": "node scripts/jest",
     "test:mocha": "node scripts/mocha"
   },
