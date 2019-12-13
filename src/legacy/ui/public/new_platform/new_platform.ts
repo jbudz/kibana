@@ -19,8 +19,8 @@
 import { IScope } from 'angular';
 
 import { IUiActionsStart, IUiActionsSetup } from 'src/plugins/ui_actions/public';
-import { Start as EmbeddableStart, Setup as EmbeddableSetup } from 'src/plugins/embeddable/public';
-import { LegacyCoreSetup, LegacyCoreStart, App } from '../../../../core/public';
+import { IEmbeddableStart, IEmbeddableSetup } from 'src/plugins/embeddable/public';
+import { LegacyCoreSetup, LegacyCoreStart, App, AppMountDeprecated } from '../../../../core/public';
 import { Plugin as DataPlugin } from '../../../../plugins/data/public';
 import { Plugin as ExpressionsPlugin } from '../../../../plugins/expressions/public';
 import {
@@ -35,7 +35,7 @@ import { SharePluginSetup, SharePluginStart } from '../../../../plugins/share/pu
 
 export interface PluginsSetup {
   data: ReturnType<DataPlugin['setup']>;
-  embeddable: EmbeddableSetup;
+  embeddable: IEmbeddableSetup;
   expressions: ReturnType<ExpressionsPlugin['setup']>;
   home: HomePublicPluginSetup;
   inspector: InspectorSetup;
@@ -47,7 +47,7 @@ export interface PluginsSetup {
 
 export interface PluginsStart {
   data: ReturnType<DataPlugin['start']>;
-  embeddable: EmbeddableStart;
+  embeddable: IEmbeddableStart;
   eui_utils: EuiUtilsStart;
   expressions: ReturnType<ExpressionsPlugin['start']>;
   home: HomePublicPluginStart;
@@ -111,10 +111,18 @@ export const legacyAppRegister = (app: App) => {
 
     // Root controller cannot return a Promise so use an internal async function and call it immediately
     (async () => {
-      const unmount = await app.mount({ core: npStart.core }, { element, appBasePath: '' });
+      const params = { element, appBasePath: npSetup.core.http.basePath.prepend(`/app/${app.id}`) };
+      const unmount = isAppMountDeprecated(app.mount)
+        ? await app.mount({ core: npStart.core }, params)
+        : await app.mount(params);
       $scope.$on('$destroy', () => {
         unmount();
       });
     })();
   });
 };
+
+function isAppMountDeprecated(mount: (...args: any[]) => any): mount is AppMountDeprecated {
+  // Mount functions with two arguments are assumed to expect deprecated `context` object.
+  return mount.length === 2;
+}
