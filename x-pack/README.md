@@ -16,17 +16,17 @@ By default, this will also set the password for native realm accounts to the pas
 
 # Testing
 ## Running specific tests
-| Test runner | Test location                                                                                                           | Runner command (working directory is kibana/x-pack)                                                                                                                                 |
-|-------------|-------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Jest        | `x-pack/**/*.test.js`<br>`x-pack/**/*.test.ts`                                                                          | `cd x-pack && node scripts/jest -t regexp [test path]`                                                                                                                              |
-| Functional  | `x-pack/test/*integration/**/config.js`<br>`x-pack/test/*functional/config.js`<br>`x-pack/test/accessibility/config.js` | `node scripts/functional_tests_server --config x-pack/test/[directory]/config.js`<br>`node scripts/functional_test_runner --config x-pack/test/[directory]/config.js --grep=regexp` |
+| Test runner  | Test location                                                                       | Runner command (working directory is kibana/x-pack)                                     |
+| ------------ | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Jest         | `x-pack/**/*.test.js`<br>`x-pack/**/*.test.ts`                                      | `cd x-pack && node scripts/jest -t regexp [test path]`                                     |
+| Functional   | `x-pack/test/*integration/**/config.js`<br>`x-pack/test/*functional/config.js`<br>`x-pack/test/accessibility/config.js`      | `node scripts/functional_tests_server --config x-pack/test/[directory]/config.js`<br>`node scripts/functional_test_runner --config x-pack/test/[directory]/config.js --grep=regexp`       |
 
 Examples:
   - Run the jest test case whose description matches 'filtering should skip values of null':
     `cd x-pack && yarn test:jest -t 'filtering should skip values of null' plugins/ml/public/application/explorer/explorer_charts/explorer_charts_container_service.test.js`
   - Run the x-pack api integration test case whose description matches the given string:
-    `yarn test:ftr:server --config x-pack/test/api_integration/config.js`
-    `yarn test:ftr:runner --config x-pack/test/api_integration/config.js --grep='apis Monitoring Beats list with restarted beat instance should load multiple clusters'`
+    `node scripts/functional_tests_server --config x-pack/test/api_integration/config.js`
+    `node scripts/functional_test_runner --config x-pack/test/api_integration/config.js --grep='apis Monitoring Beats list with restarted beat instance should load multiple clusters'`
 
 In addition to to providing a regular expression argument, specific tests can also be run by appeding `.only` to an `it` or `describe` function block. E.g. `describe(` to `describe.only(`.
 
@@ -46,17 +46,17 @@ yarn test --plugins <plugin>[,<plugin>]*    # where <plugin> is "reporting", etc
 
 #### Debugging browser tests
 ```
-yarn test:karma:debug
+yarn test:browser:dev
 ```
 Initializes an environment for debugging the browser tests. Includes an dedicated instance of the kibana server for building the test bundle, and a karma server. When running this task the build is optimized for the first time and then a karma-owned instance of the browser is opened. Click the "debug" button to open a new tab that executes the unit tests.
 
 Run single tests by appending `grep` parameter to the end of the URL. For example `http://localhost:9876/debug.html?grep=ML%20-%20Explorer%20Controller` will only run tests with 'ML - Explorer Controller' in the describe block.
 
 #### Running server unit tests
-You can run mocha unit tests by running:
+You can run server-side unit tests by running:
 
 ```
-yarn test:mocha
+yarn test:server
 ```
 
 #### Running functional tests

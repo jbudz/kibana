@@ -444,14 +444,13 @@ the same directory as source code files with the `.test.js` suffix.
 
 The following table outlines possible test file locations and how to invoke them:
 
-| Test runner        | Test location                                                                                                                                                                              | Runner command (working directory is kibana root)                                                                                      |
-|--------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
-| Jest               | `src/**/*.test.js`<br>`src/**/*.test.ts`                                                                                                                                                   | `yarn test:jest -t regexp [test path]`                                                                                                 |
-| Jest (integration) | `**/integration_tests/**/*.test.js`                                                                                                                                                        | `yarn test:jest_integration -t regexp [test path]`                                                                                     |
-| Mocha              | `src/**/__tests__/**/*.js`<br>`!src/**/public/__tests__/*.js`<br>`packages/kbn-datemath/test/**/*.js`<br>`packages/kbn-dev-utils/src/**/__tests__/**/*.js`<br>`tasks/**/__tests__/**/*.js` | `yarn test:mocha --grep=regexp [test path]`                                                                                            |
-| Functional         | `test/*integration/**/config.js`<br>`test/*functional/**/config.js`<br>`test/accessibility/config.js`                                                                                      | `yarn test:ftr:server --config test/[directory]/config.js`<br>`yarn test:ftr:runner --config test/[directory]/config.js --grep=regexp` |
-| Karma              | `src/**/public/__tests__/*.js`                                                                                                                                                             | `yarn test:karma`                                                                                                                      |
-
+| Test runner        | Test location                                                                                                                                           | Runner command (working directory is kibana root)                                       |
+| -----------------  | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Jest               | `src/**/*.test.js`<br>`src/**/*.test.ts`                                                                                                                | `node scripts/jest -t regexp [test path]`                                               |
+| Jest (integration) | `**/integration_tests/**/*.test.js`                                                                                                                     | `node scripts/jest_integration -t regexp [test path]`                                   |
+| Mocha              | `src/**/__tests__/**/*.js`<br>`!src/**/public/__tests__/*.js`<br>`packages/kbn-datemath/test/**/*.js`<br>`packages/kbn-dev-utils/src/**/__tests__/**/*.js`<br>`tasks/**/__tests__/**/*.js` | `node scripts/mocha --grep=regexp [test path]`       |
+| Functional         | `test/*integration/**/config.js`<br>`test/*functional/**/config.js`<br>`test/accessibility/config.js`                                                                                    | `node scripts/functional_tests_server --config test/[directory]/config.js`<br>`node scripts/functional_test_runner --config test/[directory]/config.js --grep=regexp`       |
+| Karma              | `src/**/public/__tests__/*.js`                                                                                                                          | `npm run test:dev`                                                                      |
 
 For X-Pack tests located in `x-pack/` see [X-Pack Testing](x-pack/README.md#testing)
 
@@ -462,21 +461,39 @@ Test runner arguments:
  Examples:
   - Run the entire elasticsearch_service test suite:
     ```
-    yarn test:jest src/core/server/elasticsearch/elasticsearch_service.test.ts
+    node scripts/jest src/core/server/elasticsearch/elasticsearch_service.test.ts
     ```
   - Run the jest test case whose description matches `stops both admin and data clients`:
     ```
-    yarn test:jest -t 'stops both admin and data clients' src/core/server/elasticsearch/elasticsearch_service.test.ts
+    node scripts/jest -t 'stops both admin and data clients' src/core/server/elasticsearch/elasticsearch_service.test.ts
     ```
   - Run the api integration test case whose description matches the given string:
     ```
-    yarn test:ftr:server --config test/api_integration/config.js
-    yarn test:ftr:runner --config test/api_integration/config.js --grep='should return 404 if id does not match any sample data sets'
+    node scripts/functional_tests_server --config test/api_integration/config.js
+    node scripts/functional_test_runner --config test/api_integration/config.js --grep='should return 404 if id does not match any sample data sets'
     ```
 
 ### Debugging Unit Tests
 
 The standard `yarn test` task runs several sub tasks and can take several minutes to complete, making debugging failures pretty painful. In order to ease the pain specialized tasks provide alternate methods for running the tests.
+
+To execute both server and browser tests, but skip linting, use `yarn test:quick`.
+
+```bash
+yarn test:quick
+```
+
+Use `yarn test:mocha` when you want to run the mocha tests.
+
+```bash
+yarn test:mocha
+```
+
+When you'd like to execute individual server-side test files, you can use the command below. Note that this command takes care of configuring Mocha with Babel compilation for you, and you'll be better off avoiding a globally installed `mocha` package. This command is great for development and for quickly identifying bugs.
+
+```bash
+node scripts/mocha <file>
+```
 
 You could also add the `--debug` option so that `node` is run using the `--debug-brk` flag. You'll need to connect a remote debugger such as [`node-inspector`](https://github.com/node-inspector/node-inspector) to proceed in this mode.
 
@@ -484,13 +501,13 @@ You could also add the `--debug` option so that `node` is run using the `--debug
 node scripts/mocha --debug <file>
 ```
 
-With `yarn test:karma`, you can run only the browser tests. Coverage reports are available for browser tests by running `yarn test:coverage`. You can find the results under the `coverage/` directory that will be created upon completion.
+With `yarn test:browser`, you can run only the browser tests. Coverage reports are available for browser tests by running `yarn test:coverage`. You can find the results under the `coverage/` directory that will be created upon completion.
 
 ```bash
-yarn test:karma
+yarn test:browser
 ```
 
-Using `yarn test:karma:debug` initializes an environment for debugging the browser tests. Includes an dedicated instance of the kibana server for building the test bundle, and a karma server. When running this task the build is optimized for the first time and then a karma-owned instance of the browser is opened. Click the "debug" button to open a new tab that executes the unit tests.
+Using `yarn test:dev` initializes an environment for debugging the browser tests. Includes an dedicated instance of the kibana server for building the test bundle, and a karma server. When running this task the build is optimized for the first time and then a karma-owned instance of the browser is opened. Click the "debug" button to open a new tab that executes the unit tests.
 
 ```bash
 yarn test:dev
@@ -500,6 +517,17 @@ In the screenshot below, you'll notice the URL is `localhost:9876/debug.html`. Y
 
 
 ![Browser test debugging](http://i.imgur.com/DwHxgfq.png)
+
+### Unit Testing Plugins
+
+This should work super if you're using the [Kibana plugin generator](https://github.com/elastic/kibana/tree/master/packages/kbn-plugin-generator). If you're not using the generator, well, you're on your own. We suggest you look at how the generator works.
+
+To run the tests for just your particular plugin run the following command from your plugin:
+
+```bash
+yarn test:mocha
+yarn test:browser --dev # remove the --dev flag to run them once and close
+```
 
 ### Cross-browser Compatibility
 

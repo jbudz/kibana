@@ -9,19 +9,23 @@ import gulp from 'gulp';
 
 import { getEnabledPlugins } from './helpers/flags';
 
-export const testKarmaTask = async () => {
+export const testServerTask = async () => {
+  throw new Error('server mocha tests are now included in the `node scripts/mocha` script');
+};
+
+export const testBrowserTask = async () => {
   const plugins = await getEnabledPlugins();
-  await pluginHelpers.run('testKarma', {
+  await pluginHelpers.run('testBrowser', {
     plugins: plugins.join(','),
   });
 };
 
-export const testKarmaDebugTask = async () => {
+export const testBrowserDevTask = async () => {
   const plugins = await getEnabledPlugins();
-  await pluginHelpers.run('testKarma', {
+  await pluginHelpers.run('testBrowser', {
     dev: true,
     plugins: plugins.join(','),
   });
 };
 
-export const testTask = gulp.series(testKarmaTask, testKarmaDebugTask);
+export const testTask = gulp.series(testBrowserTask, testServerTask);

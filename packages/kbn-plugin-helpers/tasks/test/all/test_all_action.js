@@ -18,6 +18,6 @@
  */
 
 module.exports = function testAllAction(plugin, run) {
-  run('testKarma');
-  run('testMocha');
+  run('testServer');
+  run('testBrowser');
 };

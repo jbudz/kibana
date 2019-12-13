@@ -20,7 +20,7 @@
 const execFileSync = require('child_process').execFileSync;
 const winCmd = require('../../../lib/win_cmd');
 
-module.exports = function testKarmaAction(plugin, run, options) {
+module.exports = function testBrowserAction(plugin, run, options) {
   options = options || {};
 
   const kbnServerArgs = ['--kbnServer.plugin-path=' + plugin.root];
@@ -31,7 +31,7 @@ module.exports = function testKarmaAction(plugin, run, options) {
     kbnServerArgs.push('--kbnServer.tests_bundle.pluginId=' + plugin.id);
   }
 
-  const task = options.dev ? 'test:karma:debug' : 'test:karma';
+  const task = options.dev ? 'test:dev' : 'test:browser';
   const args = [task].concat(kbnServerArgs);
   execFileSync(winCmd('yarn'), args, {
     cwd: plugin.kibanaRoot,
