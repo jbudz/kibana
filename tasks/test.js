@@ -31,21 +31,21 @@ module.exports = function(grunt) {
     }
   );
 
-  grunt.registerTask('test:browser', [
+  grunt.registerTask('test:karma', [
     'checkPlugins',
     'run:browserSCSS',
-    'run:browserTestServer',
+    'run:karmaTestServer',
     'karma:unit',
   ]);
 
-  grunt.registerTask('test:browser-ci', () => {
+  grunt.registerTask('test:karma-ci', () => {
     const ciShardTasks = keys(grunt.config.get('karma'))
       .filter(key => key.startsWith('ciShard-'))
       .map(key => `karma:${key}`);
 
     grunt.log.ok(`Running UI tests in ${ciShardTasks.length} shards`);
     grunt.task.run(['run:browserSCSS']);
-    grunt.task.run(['run:browserTestServer', ...ciShardTasks]);
+    grunt.task.run(['run:karmaTestServer', ...ciShardTasks]);
   });
 
   grunt.registerTask('test:coverage', ['run:testCoverageServer', 'karma:coverage']);
@@ -61,7 +61,7 @@ module.exports = function(grunt) {
     'run:apiIntegrationTests',
   ]);
 
-  grunt.registerTask('test:dev', ['checkPlugins', 'run:devBrowserTestServer', 'karma:dev']);
+  grunt.registerTask('test:karmaDebug', ['checkPlugins', 'run:karmaDebugServer', 'karma:dev']);
   grunt.registerTask('test:mochaCoverage', ['run:mochaCoverage']);
 
   grunt.registerTask('test', subTask => {

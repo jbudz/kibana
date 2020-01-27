@@ -193,7 +193,7 @@ yarn es snapshot
 ##### Keeping data between snapshots
 
 If you want to keep the data inside your Elasticsearch between usages of this command,
-you should use the following command, to keep your data folder outside the downloaded snapshot 
+you should use the following command, to keep your data folder outside the downloaded snapshot
 folder:
 
 ```bash
@@ -490,37 +490,19 @@ Test runner arguments:
 
 The standard `yarn test` task runs several sub tasks and can take several minutes to complete, making debugging failures pretty painful. In order to ease the pain specialized tasks provide alternate methods for running the tests.
 
-To execute both server and browser tests, but skip linting, use `yarn test:quick`.
-
-```bash
-yarn test:quick
-```
-
-Use `yarn test:mocha` when you want to run the mocha tests.
-
-```bash
-yarn test:mocha
-```
-
-When you'd like to execute individual server-side test files, you can use the command below. Note that this command takes care of configuring Mocha with Babel compilation for you, and you'll be better off avoiding a globally installed `mocha` package. This command is great for development and for quickly identifying bugs.
-
-```bash
-node scripts/mocha <file>
-```
-
 You could also add the `--debug` option so that `node` is run using the `--debug-brk` flag. You'll need to connect a remote debugger such as [`node-inspector`](https://github.com/node-inspector/node-inspector) to proceed in this mode.
 
 ```bash
 node scripts/mocha --debug <file>
 ```
 
-With `yarn test:browser`, you can run only the browser tests. Coverage reports are available for browser tests by running `yarn test:coverage`. You can find the results under the `coverage/` directory that will be created upon completion.
+With `yarn test:karma`, you can run only the browser tests. Coverage reports are available for browser tests by running `yarn test:coverage`. You can find the results under the `coverage/` directory that will be created upon completion.
 
 ```bash
-yarn test:browser
+yarn test:karma
 ```
 
-Using `yarn test:dev` initializes an environment for debugging the browser tests. Includes an dedicated instance of the kibana server for building the test bundle, and a karma server. When running this task the build is optimized for the first time and then a karma-owned instance of the browser is opened. Click the "debug" button to open a new tab that executes the unit tests.
+Using `yarn test:karma:debug` initializes an environment for debugging the browser tests. Includes an dedicated instance of the kibana server for building the test bundle, and a karma server. When running this task the build is optimized for the first time and then a karma-owned instance of the browser is opened. Click the "debug" button to open a new tab that executes the unit tests.
 
 ```bash
 yarn test:dev
