@@ -17,8 +17,11 @@
  * under the License.
  */
 
+import { writeFileSync } from 'fs';
+
 import { baseConfig } from './base_config';
-import unionWith from 'lodash.unionWith';
+import unionWith from 'lodash.unionwith';
+import { isEqual } from 'lodash';
 
 export class Config {
   constructor() {
@@ -26,23 +29,35 @@ export class Config {
   }
 
   generate(target = 'package') {
+    if (!this.targets[target]) {
+      throw new Error(`Invalid target.  Try one of ${Object.keys(this.targets)}`);
+    }
+
+    const settings = unionWith(this.targets[target].settings, this.baseConfig, (a, b) => {
+      return isEqual(a.key, b.key);
+    });
     let output = '';
-    if (!this.targets[target]) throw new Error(`Invalid target.  Try one of ${Object.keys(this.targets)}`);
-    const settings = unionBy(this.baseConfig, this.targets[target].settings, () => ));
     settings.forEach(setting => {
       output += `# ${[].concat(setting.description).join('\n# ')}\n`;
       output += `${!setting.active && '#'}${setting.key}: ${setting.value}\n\n`;
     });
-    console.log(settings);
+    return output;
+  }
+
+  write(path, target) {
+    writeFileSync(path, this.generate(target));
   }
 
   targets = {
     package: {
       description: 'deb and rpm distributions',
-      settings: {
-        key: 'path.data',
-        value: '/var/lib/kibana',
-      },
+      settings: [
+        {
+          key: 'path.data',
+          value: '/var/lib/kibana',
+          active: true,
+        },
+      ],
     },
 
     docker: {
