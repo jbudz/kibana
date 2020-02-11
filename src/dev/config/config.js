@@ -36,11 +36,13 @@ export class Config {
     const settings = unionWith(this.targets[target].settings, this.baseConfig, (a, b) => {
       return isEqual(a.key, b.key);
     });
-    let output = '';
-    settings.forEach(setting => {
-      output += `# ${[].concat(setting.description).join('\n# ')}\n`;
-      output += `${!setting.active && '#'}${setting.key}: ${setting.value}\n\n`;
-    });
+    const output = settings
+      .map(setting => {
+        return `# ${[].concat(setting.description).join('\n# ')}\n ${!setting.active && '#'}${
+          setting.key
+        }: ${setting.value}\n`;
+      })
+      .join('\n');
     return output;
   }
 
