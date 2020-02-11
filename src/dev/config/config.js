@@ -35,14 +35,17 @@ export class Config {
 
     const settings = unionWith(this.targets[target].settings, this.baseConfig, (a, b) => {
       return isEqual(a.key, b.key);
+    }).sort((a, b) => {
+      return a.key.localeCompare(b.key);
     });
     const output = settings
       .map(setting => {
-        return `# ${[].concat(setting.description).join('\n# ')}\n ${!setting.active && '#'}${
-          setting.key
-        }: ${setting.value}\n`;
+        const description = [].concat(setting.description).join('\n# ');
+        const configuration = `${!setting.active && '#'}${setting.key}: ${setting.value}`;
+        return `# ${description}\n${configuration}\n`;
       })
       .join('\n');
+
     return output;
   }
 
