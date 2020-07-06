@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+export KBN_PATH_CONF=${KBN_PATH_CONF:-<%= configDir %>}
+
 case $1 in
   # Debian
   configure)
@@ -34,5 +36,10 @@ case $1 in
   ;;
 esac
 
-chown -R <%= user %>:<%= group %> <%= dataDir %>
-chown <%= user %>:<%= group %> <%= pluginsDir %>
+# todo: requires keystore writes to /etc/kibana
+#if [ ! -f "${KBN_PATH_CONF}"/kibana.keystore ]; then
+    #/usr/share/kibana/bin/kibana-keystore --allow-root create
+    #chown root:kibana "${KBN_PATH_CONF}"/kibana.keystore
+    #chmod 660 "${KBN_PATH_CONF}"/kibana.keystore
+    #md5sum "${KBN_PATH_CONF}"/kibana.keystore > "${KBN_PATH_CONF}"/.kibana.keystore.initial_md5sum
+#fi
