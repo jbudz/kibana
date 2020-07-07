@@ -36,6 +36,13 @@ case $1 in
   ;;
 esac
 
+chown <%= user %>:<%= group %> <%= dataDir %>
+chmod 2750 <%= dataDir %>
+
+chown root:<%= group %> ${KBN_PATH_CONF}
+chown root:<%= group %> ${KBN_PATH_CONF}/kibana.yml
+chmod 660 ${KBN_PATH_CONF}/kibana.yml
+
 # todo: requires keystore writes to /etc/kibana
 #if [ ! -f "${KBN_PATH_CONF}"/kibana.keystore ]; then
     #/usr/share/kibana/bin/kibana-keystore --allow-root create
