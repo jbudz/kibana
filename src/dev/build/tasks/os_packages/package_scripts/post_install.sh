@@ -39,8 +39,9 @@ esac
 chown <%= user %>:<%= group %> <%= dataDir %>
 chmod 2750 <%= dataDir %>
 
-chown root:<%= group %> ${KBN_PATH_CONF}
-chown root:<%= group %> ${KBN_PATH_CONF}/kibana.yml
+chown :<%= group %> ${KBN_PATH_CONF}
+chown :<%= group %> ${KBN_PATH_CONF}/kibana.yml
+chmod 2750 ${KBN_PATH_CONF}
 chmod 660 ${KBN_PATH_CONF}/kibana.yml
 
 # todo: requires keystore writes to /etc/kibana
