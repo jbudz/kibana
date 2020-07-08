@@ -36,8 +36,9 @@ case $1 in
   ;;
 esac
 
-chown <%= user %>:<%= group %> <%= dataDir %>
+chown -R <%= user %>:<%= group %> <%= dataDir %>
 chmod 2750 <%= dataDir %>
+chmod -R 2755 <%= dataDir %>/*
 
 chown :<%= group %> ${KBN_PATH_CONF}
 chown :<%= group %> ${KBN_PATH_CONF}/kibana.yml
