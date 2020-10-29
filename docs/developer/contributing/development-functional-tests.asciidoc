@@ -289,8 +289,8 @@ Within a test Provider the API is exactly the same as the service providers API 
 The `FunctionalTestRunner` comes with three built-in services:
 
 **config:**:::
-* Source: {kib-repo}/tree/{branch}/src/functional_test_runner/lib/config/config.ts[src/functional_test_runner/lib/config/config.ts]
-* Schema: {kib-repo}/tree/{branch}/src/functional_test_runner/lib/config/schema.ts[src/functional_test_runner/lib/config/schema.ts]
+* Source: {kib-repo}/tree/{branch}/packages/kbn-test/src/functional_test_runner/lib/config/config.ts[packages/kbn-test/src/functional_test_runner/lib/config/config.ts]
+* Schema: {kib-repo}/tree/branch}/packages/kbn-test/src/functional_test_runner/lib/config/schema.ts[packages/kbn-test/src/functional_test_runner/lib/config/schema.ts]
 * Use `config.get(path)` to read any value from the config file
 
 **log:**:::
@@ -299,7 +299,7 @@ The `FunctionalTestRunner` comes with three built-in services:
 * `log.verbose()`, `log.debug()`, `log.info()`, `log.warning()` all work just like console.log but produce more organized output
 
 **lifecycle:**:::
-* Source: {kib-repo}/tree/{branch}/src/functional_test_runner/lib/lifecycle.ts[src/functional_test_runner/lib/lifecycle.ts]
+* Source: {kib-repo}/tree/{branch}/packages/kbn-test/src/functional_test_runner/lib/lifecycle.ts[packages/kbn-test/src/functional_test_runner/lib/lifecycle.ts]
 * Designed primary for use in services
 * Exposes lifecycle events for basic coordination. Handlers can return a promise and resolve/fail asynchronously
 * Phases include: `beforeLoadTests`, `beforeTests`, `beforeEachTest`, `cleanup`
@@ -310,14 +310,14 @@ The `FunctionalTestRunner` comes with three built-in services:
 The {kib} functional tests define the vast majority of the actual functionality used by tests.
 
 **browser**:::
-* Source: link:{kib-repo}/tree/{branch}/test/functional/services/browser.ts[test/functional/services/browser.ts]
+* Source: {kib-repo}/tree/{branch}/test/functional/services/common/browser.ts[test/functional/services/common/browser.ts]
 * Higher level wrapper for `remote` service, which exposes available browser actions
 * Popular methods:
 ** `browser.getWindowSize()`
 ** `browser.refresh()`
 
 **testSubjects:**:::
-* Source: {kib-repo}/tree/{branch}/test/functional/services/test_subjects.ts[test/functional/services/test_subjects.ts]
+* Source: {kib-repo}/tree/{branch}/test/functional/services/common/test_subjects.ts[test/functional/services/common/test_subjects.ts]
 * Test subjects are elements that are tagged specifically for selecting from tests
 * Use `testSubjects` over CSS selectors when possible
 * Usage:
@@ -342,7 +342,7 @@ await testSubjects.click(‘containerButton’);
 ** `testSubjects.click(testSubjectSelector)` - Click a test subject in the page; throw if it can't be found after some time
 
 **find:**:::
-* Source: {kib-repo}/tree/{branch}/test/functional/services/find.ts[test/functional/services/find.ts]
+* Source: {kib-repo}/tree/{branch}/test/functional/services/common/find.ts[test/functional/services/common/find.ts]
 * Helpers for `remote.findBy*` methods that log and manage timeouts
 * Popular methods:
 ** `find.byCssSelector()`
