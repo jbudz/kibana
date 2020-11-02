@@ -87,7 +87,7 @@ export async function runFpm(
     '--after-install',
     resolve(__dirname, 'package_scripts/post_install.sh'),
     '--before-install',
-    resolve(__dirname, 'package_scripts/pre_install.sh'),
+    resolve(__dirname, 'package_scripts/post_remove.sh'),
 
     // tell fpm about the config file so that it is called out in the package definition
     '--config-files',
