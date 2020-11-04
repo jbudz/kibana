@@ -27,8 +27,8 @@ export async function generate(encryptionConfig, command, options) {
 
 export function generateCli(program, encryptionConfig) {
   program
-    .command('create')
-    .description('Creates a new Kibana keystore')
+    .command('generate')
+    .description('Generates a new ephemeral encrpytion key')
     .option('-s, --silent', 'prevent all logging')
     .action(generate.bind(null, encryptionConfig));
 }

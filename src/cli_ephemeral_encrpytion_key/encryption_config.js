@@ -49,10 +49,12 @@ export class EncryptionConfig {
   }
 
   writeEncryptionKey(key) {
+    //TODO: config.write
     console.log(key);
   }
 
   writeDecryptionKeys(keys) {
+    //TODO: config.write
     console.log(keys);
   }
 
