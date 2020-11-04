@@ -19,9 +19,7 @@
 
 import crypto from 'crypto';
 import { join } from 'path';
-
-import { Config } from '@kbn/config';
-
+import { get } from 'lodash';
 import { safeLoad } from 'js-yaml';
 import { getConfigDirectory } from '@kbn/utils';
 
@@ -33,11 +31,11 @@ export class EncryptionConfig {
   }
 
   _getEncryptionKey() {
-    return Config.get(this._encryptionKeyPath);
+    return get(this._config, this._encryptionKeyPath);
   }
 
   _getDecryptionKeys() {
-    return Config.get(this._decryptionKeyPath) || [];
+    return get(this._config, this._decryptionKeyPath, []);
   }
 
   hasEncryptionKey() {
