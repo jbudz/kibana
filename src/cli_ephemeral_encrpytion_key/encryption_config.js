@@ -21,11 +21,18 @@ import crypto from 'crypto';
 import { join } from 'path';
 import { get } from 'lodash';
 import { safeLoad } from 'js-yaml';
+import deepmerge from 'deepmerge';
+
 import { getConfigDirectory } from '@kbn/utils';
+import { Keystore } from '../legacy/server/keystore';
+import { getKeystore } from '../cli_keystore/get_keystore';
 
 export class EncryptionConfig {
   constructor() {
-    this._config = safeLoad(join(getConfigDirectory(), 'kibana.yml'));
+    this._keystore = new Keystore(getKeystore());
+    const configKeystore = {};
+    this._configKibanaYML = safeLoad(join(getConfigDirectory(), 'kibana.yml'));
+    this._config = deepmerge.all(this._configKibanaYML, configKeystore)
     this._encryptionKeyPath = 'xpack.encryptedSavedObjects.encryptionKey';
     this._decryptionKeyPath = 'xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys';
   }
