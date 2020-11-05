@@ -28,7 +28,6 @@ import { getConfigDirectory } from '@kbn/utils';
 export class EncryptionConfig {
   constructor() {
     this._config = safeLoad(readFileSync(join(getConfigDirectory(), 'kibana.yml')));
-    console.log;
     this._encryptionKeyPaths = [
       'xpack.encryptedSavedObjects.encryptionKey',
       'xpack.security.encryptionKey',
