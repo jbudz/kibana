@@ -19,14 +19,16 @@
 
 import crypto from 'crypto';
 import { join } from 'path';
-import { get, isEmpty } from 'lodash';
+import { get } from 'lodash';
+import { readFileSync } from 'fs';
 import { safeLoad } from 'js-yaml';
 
 import { getConfigDirectory } from '@kbn/utils';
 
 export class EncryptionConfig {
   constructor() {
-    this._config = safeLoad(join(getConfigDirectory(), 'kibana.yml'));
+    this._config = safeLoad(readFileSync(join(getConfigDirectory(), 'kibana.yml')));
+    console.log;
     this._encryptionKeyPaths = [
       'xpack.encryptedSavedObjects.encryptionKey',
       'xpack.security.encryptionKey',

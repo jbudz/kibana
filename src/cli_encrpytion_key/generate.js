@@ -38,10 +38,14 @@ export async function generate(encryptionConfig, command) {
       return;
     }
 
-    const write = confirm('Write to kibana.yml?');
+    const write = await confirm('Write to kibana.yml?');
     if (write) {
       const kibanaYML = join(getConfigDirectory(), 'kibana.yml');
       appendFileSync(kibanaYML, safeDump(keys));
+      const warning = command.force
+        ? 'Any existing keys in kibana.yml will need to be rotated manually.'
+        : '';
+      logger.log(`Wrote ${Object.keys(keys).length} settings to kibana.yml. ${warning}`);
     }
   }
 }
