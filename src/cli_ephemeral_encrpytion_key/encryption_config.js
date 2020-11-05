@@ -32,7 +32,7 @@ export class EncryptionConfig {
     this._keystore = new Keystore(getKeystore());
     const configKeystore = {};
     this._configKibanaYML = safeLoad(join(getConfigDirectory(), 'kibana.yml'));
-    this._config = deepmerge.all(this._configKibanaYML, configKeystore)
+    this._config = deepmerge.all(this._configKibanaYML, configKeystore);
     this._encryptionKeyPath = 'xpack.encryptedSavedObjects.encryptionKey';
     this._decryptionKeyPath = 'xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys';
   }
