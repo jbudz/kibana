@@ -18,4 +18,4 @@
  */
 
 require('../setup_node_env/dist');
-require('./cli');
+require('./cli_encryption_key');
