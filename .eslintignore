@@ -14,7 +14,7 @@
 node_modules
 target
 snapshots.js
-
+Vagrantfile
 !/.eslintrc.js
 
 # plugin overrides
