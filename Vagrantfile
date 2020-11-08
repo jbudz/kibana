@@ -1,5 +1,5 @@
 Vagrant.configure("2") do |config|
-  config.vm.synced_folder '.', '/vagrant', disabled: true
+  config.vm.synced_folder 'target/', '/packages'
 
   config.vm.define "tar" do |tar|
     tar.vm.box = 'generic/ubuntu2004'
