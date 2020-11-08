@@ -11,7 +11,9 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "rpm" do |rpm|
     rpm.vm.box = 'generic/rhel8'
-    rpm.playbook = "test/package/rpm/tasks.yml"
+    config.vm.provision "ansible" do |ansible|
+      ansible.playbook = "test/package/rpm/playbook.yml"
+    end
   end
 
   config.vm.define "docker" do |docker|
