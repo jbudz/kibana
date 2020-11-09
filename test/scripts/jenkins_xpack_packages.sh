@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-node scripts/build --debug --no-oss
+node scripts/build --all-platforms --debug --no-oss
 
 vagrant up
