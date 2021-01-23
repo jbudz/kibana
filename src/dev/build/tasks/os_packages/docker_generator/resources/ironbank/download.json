@@ -1,0 +1,20 @@
+{
+  "resources": [
+    {
+      "url": "https://artifacts.elastic.co/downloads/kibana/kibana-7.10.1-linux-x86_64.tar.gz",
+      "filename": "kibana-7.10.1-linux-x86_64.tar.gz",
+      "validation": {
+        "type": "sha512",
+        "value": "bf332b3c13c4d71d3e6a1e8b68cca85b215151b5130f862ea14c548f72bca0978829cd49af8d8e9ce1bc46098c65add7d8a0cf5ec4767b219a0cd7474ec78f11"
+      }
+    },
+    {
+      "url": "https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_amd64",
+      "filename": "dumb-init",
+      "validation": {
+        "type": "sha256",
+        "value": "37f2c1f0372a45554f1b89924fbb134fc24c3756efaedf11e07f599494e0eff9"
+      }
+    }
+  ]
+}

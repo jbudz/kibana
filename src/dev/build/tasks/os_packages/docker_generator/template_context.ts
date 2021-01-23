@@ -18,6 +18,7 @@ export interface TemplateContext {
   dockerTargetFilename: string;
   baseOSImage: string;
   ubiImageFlavor: string;
+  ironbankImageFlavor: string;
   dockerBuildDate: string;
   usePublicArtifact?: boolean;
   ubi: boolean;

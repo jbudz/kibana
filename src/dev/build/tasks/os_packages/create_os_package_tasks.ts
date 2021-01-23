@@ -83,6 +83,22 @@ export const CreateDockerUBI: Task = {
   },
 };
 
+export const CreateDockerIronbankContext: Task = {
+  description: 'Creating Docker UBI image',
+
+  async run(config, log, build) {
+    if (!build.isOss()) {
+      await runDockerGenerator(config, log, build, {
+        ubi: false,
+        ironbank: true,
+        context: true,
+        architecture: 'x64',
+        image: true,
+      });
+    }
+  },
+};
+
 export const CreateDockerContexts: Task = {
   description: 'Creating Docker build contexts',
 

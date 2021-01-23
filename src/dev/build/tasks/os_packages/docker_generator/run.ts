@@ -31,12 +31,14 @@ export async function runDockerGenerator(
     context: boolean;
     image: boolean;
     ubi: boolean;
+    ironbank: boolean;
   }
 ) {
   // UBI var config
   const baseOSImage = flags.ubi ? 'docker.elastic.co/ubi8/ubi-minimal:latest' : 'centos:8';
   const ubiVersionTag = 'ubi8';
   const ubiImageFlavor = flags.ubi ? `-${ubiVersionTag}` : '';
+  const ironbankImageFlavor = flags.ironbank ? `-ironbank` : '';
 
   // General docker var config
   const license = build.isOss() ? 'ASL 2.0' : 'Elastic License';
@@ -52,11 +54,11 @@ export async function runDockerGenerator(
   const dockerBuildDir = config.resolveFromRepo(
     'build',
     'kibana-docker',
-    build.isOss() ? `oss` : `default${ubiImageFlavor}`
+    build.isOss() ? `oss` : `default${ubiImageFlavor}${ironbankImageFlavor}`
   );
   const imageArchitecture = flags.architecture === 'aarch64' ? '-aarch64' : '';
   const dockerTargetFilename = config.resolveFromTarget(
-    `kibana${imageFlavor}${ubiImageFlavor}-${version}-docker-image${imageArchitecture}.tar.gz`
+    `kibana${imageFlavor}${ubiImageFlavor}${ironbankImageFlavor}-${version}-docker-image${imageArchitecture}.tar.gz`
   );
   const scope: TemplateContext = {
     artifactPrefix,
@@ -70,6 +72,7 @@ export async function runDockerGenerator(
     dockerTargetFilename,
     baseOSImage,
     ubiImageFlavor,
+    ironbankImageFlavor,
     dockerBuildDate,
     ubi: flags.ubi,
     architecture: flags.architecture,
@@ -107,9 +110,16 @@ export async function runDockerGenerator(
   // in order to build the docker image accordingly the dockerfile defined
   // under templates/kibana_yml.template/js
   await copyAll(
-    config.resolveFromRepo('src/dev/build/tasks/os_packages/docker_generator/resources'),
+    config.resolveFromRepo('src/dev/build/tasks/os_packages/docker_generator/resources/base'),
     dockerBuildDir
   );
+
+  if (flags.ironbank) {
+    await copyAll(
+      config.resolveFromRepo('src/dev/build/tasks/os_packages/docker_generator/resources/ironbank'),
+      dockerBuildDir
+    );
+  }
 
   // Build docker image into the target folder
   // In order to do this we just call the file we
