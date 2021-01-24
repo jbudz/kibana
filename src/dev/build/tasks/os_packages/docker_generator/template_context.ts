@@ -17,11 +17,10 @@ export interface TemplateContext {
   dockerBuildDir: string;
   dockerTargetFilename: string;
   baseOSImage: string;
-  ubiImageFlavor: string;
-  ironbankImageFlavor: string;
   dockerBuildDate: string;
   usePublicArtifact?: boolean;
-  ubi: boolean;
+  ubi?: boolean;
+  ironbank?: boolean;
   revision: string;
   architecture?: string;
 }

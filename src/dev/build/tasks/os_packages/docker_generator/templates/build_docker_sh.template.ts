@@ -16,8 +16,6 @@ function generator({
   version,
   dockerTargetFilename,
   baseOSImage,
-  ubiImageFlavor,
-  ironbankImageFlavor,
   architecture,
 }: TemplateContext) {
   const fileArchitecture = architecture === 'aarch64' ? 'arm64' : 'amd64';
@@ -56,10 +54,10 @@ function generator({
 
   retry_docker_pull ${baseOSImage}
 
-  echo "Building: kibana${imageFlavor}${ubiImageFlavor}-docker"; \\
-  docker build -t ${imageTag}${imageFlavor}${ubiImageFlavor}:${version}-${fileArchitecture} -f Dockerfile . || exit 1;
+  echo "Building: kibana${imageFlavor}-docker"; \\
+  docker build -t ${imageTag}${imageFlavor}:${version}-${fileArchitecture} -f Dockerfile . || exit 1;
 
-  docker save ${imageTag}${imageFlavor}${ubiImageFlavor}${ironbankImageFlavor}:${version}-${fileArchitecture} | gzip -c > ${dockerTargetFilename}
+  docker save ${imageTag}${imageFlavor}:${version}-${fileArchitecture} | gzip -c > ${dockerTargetFilename}
 
   exit 0
   `);

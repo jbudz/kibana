@@ -13,11 +13,10 @@ import Mustache from 'mustache';
 import { TemplateContext } from '../template_context';
 
 function generator(options: TemplateContext) {
-  const dir = options.ironbankImageFlavor ? 'ironbank' : 'base';
+  const dir = options.ironbank ? 'ironbank' : 'base';
   const template = readFileSync(resolve(__dirname, dir, './Dockerfile'));
   return Mustache.render(template.toString(), {
-    packageManager: options.ubiImageFlavor ? 'microdnf' : 'yum',
-    tiniBin: options.architecture === 'aarch64' ? 'tini-arm64' : 'tini-amd64',
+    packageManager: options.ubi ? 'microdnf' : 'yum',
     ...options,
   });
 }

@@ -54,17 +54,13 @@ export const CreateDockerCentOS: Task = {
 
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
-      ubi: false,
-      ironbank: false,
-      context: false,
       architecture: 'x64',
+      context: false,
       image: true,
     });
     await runDockerGenerator(config, log, build, {
-      ubi: false,
-      context: false,
-      ironbank: false,
       architecture: 'aarch64',
+      context: false,
       image: true,
     });
   },
@@ -76,26 +72,9 @@ export const CreateDockerUBI: Task = {
   async run(config, log, build) {
     if (!build.isOss()) {
       await runDockerGenerator(config, log, build, {
-        ubi: true,
-        ironbank: false,
+        architecture: 'x64',
         context: false,
-        architecture: 'x64',
-        image: true,
-      });
-    }
-  },
-};
-
-export const CreateDockerIronbankContext: Task = {
-  description: 'Creating Docker UBI image',
-
-  async run(config, log, build) {
-    if (!build.isOss()) {
-      await runDockerGenerator(config, log, build, {
-        ubi: false,
-        ironbank: true,
-        context: true,
-        architecture: 'x64',
+        ubi: true,
         image: true,
       });
     }
@@ -107,8 +86,6 @@ export const CreateDockerContexts: Task = {
 
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
-      ubi: false,
-      ironbank: false,
       context: true,
       image: false,
     });
@@ -116,12 +93,10 @@ export const CreateDockerContexts: Task = {
     if (!build.isOss()) {
       await runDockerGenerator(config, log, build, {
         ubi: true,
-        ironbank: false,
         context: true,
         image: false,
       });
       await runDockerGenerator(config, log, build, {
-        ubi: false,
         ironbank: true,
         context: true,
         image: false,
