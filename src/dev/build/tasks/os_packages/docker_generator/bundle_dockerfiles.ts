@@ -8,6 +8,7 @@
 
 import { resolve } from 'path';
 import { readFileSync } from 'fs';
+
 import { ToolingLog } from '@kbn/dev-utils';
 import Mustache from 'mustache';
 
