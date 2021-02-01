@@ -39,16 +39,13 @@ export async function bundleDockerFiles(config: Config, log: ToolingLog, scope: 
   await copyAll(resolve(scope.dockerBuildDir, 'config'), resolve(dockerFilesBuildDir, 'config'));
   if (scope.ironbank) {
     await copyAll(resolve(scope.dockerBuildDir), resolve(dockerFilesBuildDir), {
-      select: ['LICENSE', 'README.md'],
+      select: ['LICENSE'],
     });
-
     // 'Jenkinsfile', download.json
-    const templates = ['download.json', 'Jenkinsfile'];
+    const templates = ['download.json', 'Jenkinsfile', 'README.md'];
     for (const template of templates) {
       const file = readFileSync(resolve(__dirname, 'templates/ironbank', template));
-      const output = Mustache.render(file.toString(), {
-        scope,
-      });
+      const output = Mustache.render(file.toString(), scope);
       await write(resolve(dockerFilesBuildDir, template), output);
     }
   }
