@@ -7,6 +7,7 @@
 
 const path = require('path');
 const webpack = require('webpack');
+const TerserPlugin = require('terser-webpack-plugin');
 const { stringifyRequest } = require('loader-utils'); // eslint-disable-line
 
 const {
@@ -190,5 +191,21 @@ module.exports = {
   node: {
     fs: 'empty',
     child_process: 'empty',
+  },
+  optimization: {
+    minimizer: [
+      isProd
+        ? new TerserPlugin({
+            cache: false,
+            sourceMap: false,
+            extractComments: false,
+            parallel: false,
+            terserOptions: {
+              compress: true,
+              mangle: true,
+            },
+          })
+        : false,
+    ].filter(Boolean),
   },
 };
