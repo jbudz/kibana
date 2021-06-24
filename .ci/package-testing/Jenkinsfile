@@ -9,7 +9,7 @@ kibanaPipeline(timeoutMinutes: 300) {
           kibanaPipeline.bash("test/scripts/jenkins_xpack_package_build.sh", "Package builds")
         }
       }
-      def packageTypes = ['deb', 'docker', 'rpm']
+      def packageTypes = ['deb', 'docker', 'rpm', 'sles12']
       def workers = [:]
       packageTypes.each { type ->
         workers["package-${type}"] = {

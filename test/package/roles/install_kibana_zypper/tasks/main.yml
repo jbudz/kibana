@@ -1,0 +1,35 @@
+- name: install dependencies
+  become: yes
+  zypper:
+    name:
+      - mozilla-nss
+      - fonts-config
+      - libfreetype6
+    state: latest
+
+- name: find rpm package
+  find:
+    paths: /packages/
+    patterns: kibana-*-x86_64.rpm
+  register: kibana_rpm
+
+- name: install
+  become: yes
+  zypper:
+    name: '{{ kibana_rpm.files[0].path }}'
+    state: present
+    disable_gpg_check: yes
+
+- name: copy configuration
+  become: yes
+  template:
+    src: templates/kibana.yml
+    dest: /etc/kibana/kibana.yml
+  register: config
+
+- name: start kibana
+  become: yes
+  systemd:
+    state: started
+    name: kibana
+    daemon_reload: yes

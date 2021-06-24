@@ -1,7 +1,7 @@
-- name: test kibana rpm package
-  hosts: rpm
+- name: test kibana on sles12
+  hosts: sles12
   roles:
-    - install_kibana_yum
+    - install_kibana_zypper
     - assert_keystore_available
     - assert_keystore_cli
     - assert_kibana_yml
