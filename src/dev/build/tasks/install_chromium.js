@@ -16,8 +16,12 @@ export const InstallChromium = {
 
   async run(config, log, build) {
     for (const platform of config.getNodePlatforms()) {
-      log.info(`Installing Chromium for ${platform.getName()}-${platform.getArchitecture()}`);
+      const target = `${platform.getName()}-${platform.getArchitecture()}`;
 
+      // Remove after https://github.com/elastic/kibana/pull/112905 is merged
+      if (target === 'darwin-arm64') continue;
+
+      log.info(`Installing Chromium for ${target}`);
       const { binaryPath$ } = installBrowser(
         log,
         build.resolvePathForPlatform(platform, 'x-pack/plugins/reporting/chromium'),

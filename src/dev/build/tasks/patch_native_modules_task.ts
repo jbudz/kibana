@@ -54,6 +54,10 @@ const packages: Package[] = [
       // * npm install, which will also create a build
       // * gzip -c build/Release/re2.node > linux-arm64-83.gz
       // * upload to kibana-ci-proxy-cache bucket
+      'darwin-arm64': {
+        url: 'https://storage.googleapis.com/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.16.0/darwin-arm64-93.gz',
+        sha256: '017be403951e1938d7f011288521c2d9339a69b7e525ca33a74e516cd7e06036',
+      },
       'linux-arm64': {
         url: 'https://storage.googleapis.com/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.16.0/linux-arm64-93.gz',
         sha256: '7a786e0b75985e5aafdefa9af55cad8e85e69a3326f16d8c63d21d6b5b3bff1b',

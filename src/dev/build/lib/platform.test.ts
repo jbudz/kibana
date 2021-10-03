@@ -47,5 +47,6 @@ describe('isMac()', () => {
     expect(new Platform('win32', 'x64', 'foo').isMac()).toBe(false);
     expect(new Platform('linux', 'x64', 'foo').isMac()).toBe(false);
     expect(new Platform('darwin', 'x64', 'foo').isMac()).toBe(true);
+    expect(new Platform('darwin', 'arm64', 'foo').isMac()).toBe(true);
   });
 });
