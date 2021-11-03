@@ -42,6 +42,7 @@ kibana_vars=(
     data.autocomplete.valueSuggestions.timeout
     elasticsearch.customHeaders
     elasticsearch.hosts
+    elasticsearch.ignoreVersionMisMatch
     elasticsearch.logQueries
     elasticsearch.password
     elasticsearch.pingTimeout
