@@ -3,6 +3,7 @@ set -e
 
 REMOVE_DIRS=false
 REMOVE_USER_AND_GROUP=false
+REMOVE_KIBANA_KEYSTORE=false
 
 case $1 in
   # Includes cases for all valid arguments, exit 1 otherwise
@@ -10,6 +11,7 @@ case $1 in
   purge)
     REMOVE_DIRS=true
     REMOVE_USER_AND_GROUP=true
+    REMOVE_KIBANA_KEYSTORE=true
   ;;
   remove)
     REMOVE_DIRS=true
@@ -53,8 +55,15 @@ if [ "$REMOVE_DIRS" = "true" ]; then
       echo " OK"
   fi
 
+  if [ "$REMOVE_KIBANA_KEYSTORE" = "true" ]; then
+    if [ -e "<%= configDir %>/kibana.keystore" ]; then
+      echo -n "Deleting kibana.keystore..."
+      rm -f "<%= configDir %>}/kibana.keystore"
+      echo "OK"
+    fi
+  fi
+
   if [ -d "<%= configDir %>" ]; then
-    rm --force "<%= configDir %>"/kibana.keystore
     rmdir --ignore-fail-on-non-empty "<%= configDir %>"
   fi
 
