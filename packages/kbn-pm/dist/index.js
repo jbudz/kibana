@@ -20479,7 +20479,7 @@ if ( true && module.exports) {
 
 /***/ }),
 
-/***/ "../../node_modules/cmd-shim/index.js":
+/***/ "../../node_modules/cmd-shim/lib/index.js":
 /***/ (function(module, exports, __webpack_require__) {
 
 // On windows, create a .cmd file.
@@ -20490,130 +20490,114 @@ if ( true && module.exports) {
 // "#!<prog> <args...>"
 //
 // Write a binroot/pkg.bin + ".cmd" file that has this line in it:
-// @<prog> <args...> %~dp0<target> %*
+// @<prog> <args...> %dp0%<target> %*
 
-module.exports = cmdShim
-cmdShim.ifExists = cmdShimIfExists
+const { promisify } = __webpack_require__("util")
+const fs = __webpack_require__("fs")
+const writeFile = promisify(fs.writeFile)
+const readFile = promisify(fs.readFile)
+const chmod = promisify(fs.chmod)
+const stat = promisify(fs.stat)
+const unlink = promisify(fs.unlink)
 
-var fs = __webpack_require__("../../node_modules/graceful-fs/graceful-fs.js")
+const { dirname, relative } = __webpack_require__("path")
+const mkdir = __webpack_require__("../../node_modules/mkdirp-infer-owner/index.js")
+const toBatchSyntax = __webpack_require__("../../node_modules/cmd-shim/lib/to-batch-syntax.js")
+const shebangExpr = /^#!\s*(?:\/usr\/bin\/env\s*((?:[^ \t=]+=[^ \t=]+\s+)*))?([^ \t]+)(.*)$/
 
-var mkdir = __webpack_require__("../../node_modules/mkdirp/index.js")
-  , path = __webpack_require__("path")
-  , toBatchSyntax = __webpack_require__("../../node_modules/cmd-shim/lib/to-batch-syntax.js")
-  , shebangExpr = /^#\!\s*(?:\/usr\/bin\/env)?\s*([^ \t]+=[^ \t]+\s+)*\s*([^ \t]+)(.*)$/
-
-function cmdShimIfExists (from, to, cb) {
-  fs.stat(from, function (er) {
-    if (er) return cb()
-    cmdShim(from, to, cb)
-  })
-}
+const cmdShimIfExists = (from, to) =>
+  stat(from).then(() => cmdShim(from, to), () => {})
 
 // Try to unlink, but ignore errors.
 // Any problems will surface later.
-function rm (path, cb) {
-  fs.unlink(path, function(er) {
-    cb()
-  })
-}
+const rm = path => unlink(path).catch(() => {})
 
-function cmdShim (from, to, cb) {
-  fs.stat(from, function (er, stat) {
-    if (er)
-      return cb(er)
+const cmdShim = (from, to) =>
+  stat(from).then(() => cmdShim_(from, to))
 
-    cmdShim_(from, to, cb)
-  })
-}
+const cmdShim_ = (from, to) => Promise.all([
+  rm(to),
+  rm(to + '.cmd'),
+  rm(to + '.ps1'),
+]).then(() => writeShim(from, to))
 
-function cmdShim_ (from, to, cb) {
-  var then = times(2, next, cb)
-  rm(to, then)
-  rm(to + ".cmd", then)
-
-  function next(er) {
-    writeShim(from, to, cb)
-  }
-}
-
-function writeShim (from, to, cb) {
+const writeShim = (from, to) =>
   // make a cmd file and a sh script
   // First, check if the bin is a #! of some sort.
   // If not, then assume it's something that'll be compiled, or some other
   // sort of script, and just call it directly.
-  mkdir(path.dirname(to), function (er) {
-    if (er)
-      return cb(er)
-    fs.readFile(from, "utf8", function (er, data) {
-      if (er) return writeShim_(from, to, null, null, cb)
-      var firstLine = data.trim().split(/\r*\n/)[0]
-        , shebang = firstLine.match(shebangExpr)
-      if (!shebang) return writeShim_(from, to, null, null, null, cb)
-      var vars = shebang[1] || ""
-        , prog = shebang[2]
-        , args = shebang[3] || ""
-      return writeShim_(from, to, prog, args, vars, cb)
-    })
-  })
-}
+  mkdir(dirname(to))
+    .then(() => readFile(from, 'utf8'))
+    .then(data => {
+      const firstLine = data.trim().split(/\r*\n/)[0]
+      const shebang = firstLine.match(shebangExpr)
+      if (!shebang) {
+        return writeShim_(from, to)
+      }
+      const vars = shebang[1] || ''
+      const prog = shebang[2]
+      const args = shebang[3] || ''
+      return writeShim_(from, to, prog, args, vars)
+    }, er => writeShim_(from, to))
 
-
-function writeShim_ (from, to, prog, args, variables, cb) {
-  var shTarget = path.relative(path.dirname(to), from)
-    , target = shTarget.split("/").join("\\")
-    , longProg
-    , shProg = prog && prog.split("\\").join("/")
-    , shLongProg
-    , pwshProg = shProg && "\"" + shProg + "$exe\""
-    , pwshLongProg
-  shTarget = shTarget.split("\\").join("/")
-  args = args || ""
-  variables = variables || ""
+const writeShim_ = (from, to, prog, args, variables) => {
+  let shTarget = relative(dirname(to), from)
+  let target = shTarget.split('/').join('\\')
+  let longProg
+  let shProg = prog && prog.split('\\').join('/')
+  let shLongProg
+  let pwshProg = shProg && `"${shProg}$exe"`
+  let pwshLongProg
+  shTarget = shTarget.split('\\').join('/')
+  args = args || ''
+  variables = variables || ''
   if (!prog) {
-    prog = "\"%~dp0\\" + target + "\""
-    shProg = "\"$basedir/" + shTarget + "\""
+    prog = `"%dp0%\\${target}"`
+    shProg = `"$basedir/${shTarget}"`
     pwshProg = shProg
-    args = ""
-    target = ""
-    shTarget = ""
+    args = ''
+    target = ''
+    shTarget = ''
   } else {
-    longProg = "\"%~dp0\\" + prog + ".exe\""
-    shLongProg = "\"$basedir/" + prog + "\""
-    pwshLongProg = "\"$basedir/" + prog + "$exe\""
-    target = "\"%~dp0\\" + target + "\""
-    shTarget = "\"$basedir/" + shTarget + "\""
+    longProg = `"%dp0%\\${prog}.exe"`
+    shLongProg = `"$basedir/${prog}"`
+    pwshLongProg = `"$basedir/${prog}$exe"`
+    target = `"%dp0%\\${target}"`
+    shTarget = `"$basedir/${shTarget}"`
   }
 
-  // @SETLOCAL
-  //
-  // @IF EXIST "%~dp0\node.exe" (
-  //   @SET "_prog=%~dp0\node.exe"
-  // ) ELSE (
-  //   @SET "_prog=node"
-  //   @SET PATHEXT=%PATHEXT:;.JS;=;%
-  // )
-  //
-  // "%_prog%" "%~dp0\.\node_modules\npm\bin\npm-cli.js" %*
-  // @ENDLOCAL
-  var cmd
+  // Subroutine trick to fix https://github.com/npm/cmd-shim/issues/10
+  // and https://github.com/npm/cli/issues/969
+  const head = '@ECHO off\r\n' +
+    'GOTO start\r\n' +
+    ':find_dp0\r\n' +
+    'SET dp0=%~dp0\r\n' +
+    'EXIT /b\r\n' +
+    ':start\r\n' +
+    'SETLOCAL\r\n' +
+    'CALL :find_dp0\r\n'
+
+  let cmd
   if (longProg) {
-    shLongProg = shLongProg.trim();
-    args = args.trim();
-    var variableDeclarationsAsBatch = toBatchSyntax.convertToSetCommands(variables)
-    cmd = "@SETLOCAL\r\n"
-        + variableDeclarationsAsBatch
-        + "\r\n"
-        + "@IF EXIST " + longProg + " (\r\n"
-        + "  @SET \"_prog=" + longProg.replace(/(^")|("$)/g, '') + "\"\r\n"
-        + ") ELSE (\r\n"
-        + "  @SET \"_prog=" + prog.replace(/(^")|("$)/g, '') + "\"\r\n"
-        + "  @SET PATHEXT=%PATHEXT:;.JS;=;%\r\n"
-        + ")\r\n"
-        + "\r\n"
-        +  "\"%_prog%\" " + args + " " + target + " %*\r\n"
-        + '@ENDLOCAL\r\n'
+    shLongProg = shLongProg.trim()
+    args = args.trim()
+    const variablesBatch = toBatchSyntax.convertToSetCommands(variables)
+    cmd = head
+        + variablesBatch
+        + '\r\n'
+        + `IF EXIST ${longProg} (\r\n`
+        + `  SET "_prog=${longProg.replace(/(^")|("$)/g, '')}"\r\n`
+        + ') ELSE (\r\n'
+        + `  SET "_prog=${prog.replace(/(^")|("$)/g, '')}"\r\n`
+        + '  SET PATHEXT=%PATHEXT:;.JS;=;%\r\n'
+        + ')\r\n'
+        + '\r\n'
+        // prevent "Terminate Batch Job? (Y/n)" message
+        // https://github.com/npm/cli/issues/969#issuecomment-737496588
+        + 'endLocal & goto #_undefined_# 2>NUL || title %COMSPEC% & '
+        + `"%_prog%" ${args} ${target} %*\r\n`
   } else {
-    cmd = "@" + prog + " " + args + " " + target + " %*\r\n"
+    cmd = `${head}${prog} ${args} ${target} %*\r\n`
   }
 
   // #!/bin/sh
@@ -20624,38 +20608,31 @@ function writeShim_ (from, to, prog, args, variables, cb) {
   // esac
   //
   // if [ -x "$basedir/node.exe" ]; then
-  //   "$basedir/node.exe" "$basedir/node_modules/npm/bin/npm-cli.js" "$@"
-  //   ret=$?
+  //   exec "$basedir/node.exe" "$basedir/node_modules/npm/bin/npm-cli.js" "$@"
   // else
-  //   node "$basedir/node_modules/npm/bin/npm-cli.js" "$@"
-  //   ret=$?
+  //   exec node "$basedir/node_modules/npm/bin/npm-cli.js" "$@"
   // fi
-  // exit $ret
 
-  var sh = "#!/bin/sh\n"
+  let sh = '#!/bin/sh\n'
 
   sh = sh
-      + "basedir=$(dirname \"$(echo \"$0\" | sed -e 's,\\\\,/,g')\")\n"
-      + "\n"
-      + "case `uname` in\n"
-      + "    *CYGWIN*|*MINGW*|*MSYS*) basedir=`cygpath -w \"$basedir\"`;;\n"
-      + "esac\n"
-      + "\n"
+      + `basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")\n`
+      + '\n'
+      + 'case `uname` in\n'
+      + '    *CYGWIN*|*MINGW*|*MSYS*) basedir=`cygpath -w "$basedir"`;;\n'
+      + 'esac\n'
+      + '\n'
 
   if (shLongProg) {
     sh = sh
-       + "if [ -x "+shLongProg+" ]; then\n"
-       + "  " + variables + shLongProg + " " + args + " " + shTarget + " \"$@\"\n"
-       + "  ret=$?\n"
-       + "else \n"
-       + "  " + variables + shProg + " " + args + " " + shTarget + " \"$@\"\n"
-       + "  ret=$?\n"
-       + "fi\n"
-       + "exit $ret\n"
+       + `if [ -x ${shLongProg} ]; then\n`
+       + `  exec ${variables}${shLongProg} ${args} ${shTarget} "$@"\n`
+       + 'else \n'
+       + `  exec ${variables}${shProg} ${args} ${shTarget} "$@"\n`
+       + 'fi\n'
   } else {
     sh = sh
-       + shProg + " " + args + " " + shTarget + " \"$@\"\n"
-       + "exit $?\n"
+       + `exec ${shProg} ${args} ${shTarget} "$@"\n`
   }
 
   // #!/usr/bin/env pwsh
@@ -20669,66 +20646,79 @@ function writeShim_ (from, to, prog, args, variables, cb) {
   //   $exe = ".exe"
   // }
   // if (Test-Path "$basedir/node") {
-  //   & "$basedir/node$exe" "$basedir/node_modules/npm/bin/npm-cli.js" $args
+  //   # Suport pipeline input
+  //   if ($MyInvocation.ExpectingInput) {
+  //     input | & "$basedir/node$exe" "$basedir/node_modules/npm/bin/npm-cli.js" $args
+  //   } else {
+  //     & "$basedir/node$exe" "$basedir/node_modules/npm/bin/npm-cli.js" $args
+  //   }
   //   $ret=$LASTEXITCODE
   // } else {
-  //   & "node$exe" "$basedir/node_modules/npm/bin/npm-cli.js" $args
+  //   # Support pipeline input
+  //   if ($MyInvocation.ExpectingInput) {
+  //     $input | & "node$exe" "$basedir/node_modules/npm/bin/npm-cli.js" $args
+  //   } else {
+  //     & "node$exe" "$basedir/node_modules/npm/bin/npm-cli.js" $args
+  //   }
   //   $ret=$LASTEXITCODE
   // }
   // exit $ret
-  var pwsh = "#!/usr/bin/env pwsh\n"
-           + "$basedir=Split-Path $MyInvocation.MyCommand.Definition -Parent\n"
-           + "\n"
-           + "$exe=\"\"\n"
-           + "if ($PSVersionTable.PSVersion -lt \"6.0\" -or $IsWindows) {\n"
-           + "  # Fix case when both the Windows and Linux builds of Node\n"
-           + "  # are installed in the same directory\n"
-           + "  $exe=\".exe\"\n"
-           + "}\n"
+  let pwsh = '#!/usr/bin/env pwsh\n'
+           + '$basedir=Split-Path $MyInvocation.MyCommand.Definition -Parent\n'
+           + '\n'
+           + '$exe=""\n'
+           + 'if ($PSVersionTable.PSVersion -lt "6.0" -or $IsWindows) {\n'
+           + '  # Fix case when both the Windows and Linux builds of Node\n'
+           + '  # are installed in the same directory\n'
+           + '  $exe=".exe"\n'
+           + '}\n'
   if (shLongProg) {
     pwsh = pwsh
-         + "$ret=0\n"
-         + "if (Test-Path " + pwshLongProg + ") {\n"
-         + "  & " + pwshLongProg + " " + args + " " + shTarget + " $args\n"
-         + "  $ret=$LASTEXITCODE\n"
-         + "} else {\n"
-         + "  & " + pwshProg + " " + args + " " + shTarget + " $args\n"
-         + "  $ret=$LASTEXITCODE\n"
-         + "}\n"
-         + "exit $ret\n"
+         + '$ret=0\n'
+         + `if (Test-Path ${pwshLongProg}) {\n`
+         + '  # Support pipeline input\n'
+         + '  if ($MyInvocation.ExpectingInput) {\n'
+         + `    $input | & ${pwshLongProg} ${args} ${shTarget} $args\n`
+         + '  } else {\n'
+         + `    & ${pwshLongProg} ${args} ${shTarget} $args\n`
+         + '  }\n'
+         + '  $ret=$LASTEXITCODE\n'
+         + '} else {\n'
+         + '  # Support pipeline input\n'
+         + '  if ($MyInvocation.ExpectingInput) {\n'
+         + `    $input | & ${pwshProg} ${args} ${shTarget} $args\n`
+         + '  } else {\n'
+         + `    & ${pwshProg} ${args} ${shTarget} $args\n`
+         + '  }\n'
+         + '  $ret=$LASTEXITCODE\n'
+         + '}\n'
+         + 'exit $ret\n'
   } else {
     pwsh = pwsh
-         + "& " + pwshProg + " " + args + " " + shTarget + " $args\n"
-         + "exit $LASTEXITCODE\n"
+         + '# Support pipeline input\n'
+         + 'if ($MyInvocation.ExpectingInput) {\n'
+         + `  $input | & ${pwshProg} ${args} ${shTarget} $args\n`
+         + '} else {\n'
+         + `  & ${pwshProg} ${args} ${shTarget} $args\n`
+         + '}\n'
+         + 'exit $LASTEXITCODE\n'
   }
 
-  var then = times(3, next, cb)
-  fs.writeFile(to + ".ps1", pwsh, "utf8", then)
-  fs.writeFile(to + ".cmd", cmd, "utf8", then)
-  fs.writeFile(to, sh, "utf8", then)
-  function next () {
-    chmodShim(to, cb)
-  }
+  return Promise.all([
+    writeFile(to + '.ps1', pwsh, 'utf8'),
+    writeFile(to + '.cmd', cmd, 'utf8'),
+    writeFile(to, sh, 'utf8'),
+  ]).then(() => chmodShim(to))
 }
 
-function chmodShim (to, cb) {
-  var then = times(2, cb, cb)
-  fs.chmod(to, "0755", then)
-  fs.chmod(to + ".cmd", "0755", then)
-  fs.chmod(to + ".ps1", "0755", then)
-}
+const chmodShim = to => Promise.all([
+  chmod(to, 0o755),
+  chmod(to + '.cmd', 0o755),
+  chmod(to + '.ps1', 0o755),
+])
 
-function times(n, ok, cb) {
-  var errState = null
-  return function(er) {
-    if (!errState) {
-      if (er)
-        cb(errState = er)
-      else if (--n === 0)
-        ok()
-    }
-  }
-}
+module.exports = cmdShim
+cmdShim.ifExists = cmdShimIfExists
 
 
 /***/ }),
@@ -20740,54 +20730,51 @@ exports.replaceDollarWithPercentPair = replaceDollarWithPercentPair
 exports.convertToSetCommand = convertToSetCommand
 exports.convertToSetCommands = convertToSetCommands
 
-function convertToSetCommand(key, value) {
-    var line = ""
-    key = key || ""
-    key = key.trim()
-    value = value || ""
-    value = value.trim()
-    if(key && value && value.length > 0) {
-        line = "@SET " + key + "=" + replaceDollarWithPercentPair(value) + "\r\n"
+function convertToSetCommand (key, value) {
+  var line = ''
+  key = key || ''
+  key = key.trim()
+  value = value || ''
+  value = value.trim()
+  if (key && value && value.length > 0) {
+    line = '@SET ' + key + '=' + replaceDollarWithPercentPair(value) + '\r\n'
+  }
+  return line
+}
+
+function extractVariableValuePairs (declarations) {
+  var pairs = {}
+  declarations.map(function (declaration) {
+    var split = declaration.split('=')
+    pairs[split[0]] = split[1]
+  })
+  return pairs
+}
+
+function convertToSetCommands (variableString) {
+  var variableValuePairs = extractVariableValuePairs(variableString.split(' '))
+  var variableDeclarationsAsBatch = ''
+  Object.keys(variableValuePairs).forEach(function (key) {
+    variableDeclarationsAsBatch += convertToSetCommand(key, variableValuePairs[key])
+  })
+  return variableDeclarationsAsBatch
+}
+
+function replaceDollarWithPercentPair (value) {
+  var dollarExpressions = /\$\{?([^$@#?\- \t{}:]+)\}?/g
+  var result = ''
+  var startIndex = 0
+  do {
+    var match = dollarExpressions.exec(value)
+    if (match) {
+      var betweenMatches = value.substring(startIndex, match.index) || ''
+      result += betweenMatches + '%' + match[1] + '%'
+      startIndex = dollarExpressions.lastIndex
     }
-    return line
+  } while (dollarExpressions.lastIndex > 0)
+  result += value.slice(startIndex)
+  return result
 }
-
-function extractVariableValuePairs(declarations) {
-    var pairs = {}
-    declarations.map(function(declaration) {
-        var split = declaration.split("=")
-        pairs[split[0]]=split[1]
-    })
-    return pairs
-}
-
-function convertToSetCommands(variableString) {
-    var variableValuePairs = extractVariableValuePairs(variableString.split(" "))
-    var variableDeclarationsAsBatch = ""
-    Object.keys(variableValuePairs).forEach(function (key) {
-        variableDeclarationsAsBatch += convertToSetCommand(key, variableValuePairs[key])
-    })
-    return variableDeclarationsAsBatch
-}
-
-function replaceDollarWithPercentPair(value) {
-    var dollarExpressions = /\$\{?([^\$@#\?\- \t{}:]+)\}?/g
-    var result = ""
-    var startIndex = 0
-    value = value || ""
-    do {
-        var match = dollarExpressions.exec(value)
-        if(match) {
-            var betweenMatches = value.substring(startIndex, match.index) || ""
-            result +=  betweenMatches + "%" + match[1] + "%"
-            startIndex = dollarExpressions.lastIndex
-        }
-    } while (dollarExpressions.lastIndex > 0)
-    result += value.substr(startIndex)
-    return result
-}
-
-
 
 
 /***/ }),
@@ -36013,6 +36000,84 @@ if (
 
 /***/ }),
 
+/***/ "../../node_modules/infer-owner/index.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+const cache = new Map()
+const fs = __webpack_require__("fs")
+const { dirname, resolve } = __webpack_require__("path")
+
+
+const lstat = path => new Promise((res, rej) =>
+  fs.lstat(path, (er, st) => er ? rej(er) : res(st)))
+
+const inferOwner = path => {
+  path = resolve(path)
+  if (cache.has(path))
+    return Promise.resolve(cache.get(path))
+
+  const statThen = st => {
+    const { uid, gid } = st
+    cache.set(path, { uid, gid })
+    return { uid, gid }
+  }
+  const parent = dirname(path)
+  const parentTrap = parent === path ? null : er => {
+    return inferOwner(parent).then((owner) => {
+      cache.set(path, owner)
+      return owner
+    })
+  }
+  return lstat(path).then(statThen, parentTrap)
+}
+
+const inferOwnerSync = path => {
+  path = resolve(path)
+  if (cache.has(path))
+    return cache.get(path)
+
+  const parent = dirname(path)
+
+  // avoid obscuring call site by re-throwing
+  // "catch" the error by returning from a finally,
+  // only if we're not at the root, and the parent call works.
+  let threw = true
+  try {
+    const st = fs.lstatSync(path)
+    threw = false
+    const { uid, gid } = st
+    cache.set(path, { uid, gid })
+    return { uid, gid }
+  } finally {
+    if (threw && parent !== path) {
+      const owner = inferOwnerSync(parent)
+      cache.set(path, owner)
+      return owner // eslint-disable-line no-unsafe-finally
+    }
+  }
+}
+
+const inflight = new Map()
+module.exports = path => {
+  path = resolve(path)
+  if (inflight.has(path))
+    return Promise.resolve(inflight.get(path))
+  const p = inferOwner(path).then(owner => {
+    inflight.delete(path)
+    return owner
+  })
+  inflight.set(path, p)
+  return p
+}
+module.exports.sync = inferOwnerSync
+module.exports.clearCache = () => {
+  cache.clear()
+  inflight.clear()
+}
+
+
+/***/ }),
+
 /***/ "../../node_modules/inflight/inflight.js":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -38486,108 +38551,484 @@ function isConstructorOrProto (obj, key) {
 
 /***/ }),
 
-/***/ "../../node_modules/mkdirp/index.js":
+/***/ "../../node_modules/mkdirp-infer-owner/index.js":
 /***/ (function(module, exports, __webpack_require__) {
 
-var path = __webpack_require__("path");
-var fs = __webpack_require__("fs");
-var _0777 = parseInt('0777', 8);
+const inferOwner = __webpack_require__("../../node_modules/infer-owner/index.js")
+const mkdirp = __webpack_require__("../../node_modules/mkdirp-infer-owner/node_modules/mkdirp/index.js")
+const {promisify} = __webpack_require__("util")
+const chownr = promisify(__webpack_require__("../../node_modules/mkdirp-infer-owner/node_modules/chownr/chownr.js"))
 
-module.exports = mkdirP.mkdirp = mkdirP.mkdirP = mkdirP;
+const platform = process.env.__TESTING_MKDIRP_INFER_OWNER_PLATFORM__
+  || process.platform
+const isWindows = platform === 'win32'
+const isRoot = process.getuid && process.getuid() === 0
+const doChown = !isWindows && isRoot
 
-function mkdirP (p, opts, f, made) {
-    if (typeof opts === 'function') {
-        f = opts;
-        opts = {};
-    }
-    else if (!opts || typeof opts !== 'object') {
-        opts = { mode: opts };
-    }
-    
-    var mode = opts.mode;
-    var xfs = opts.fs || fs;
-    
-    if (mode === undefined) {
-        mode = _0777 & (~process.umask());
-    }
-    if (!made) made = null;
-    
-    var cb = f || function () {};
-    p = path.resolve(p);
-    
-    xfs.mkdir(p, mode, function (er) {
-        if (!er) {
-            made = made || p;
-            return cb(null, made);
-        }
-        switch (er.code) {
-            case 'ENOENT':
-                if (path.dirname(p) === p) return cb(er);
-                mkdirP(path.dirname(p), opts, function (er, made) {
-                    if (er) cb(er, made);
-                    else mkdirP(p, opts, cb, made);
-                });
-                break;
+module.exports = !doChown ? (path, opts) => mkdirp(path, opts)
+  : (path, opts) => inferOwner(path).then(({uid, gid}) =>
+    mkdirp(path, opts).then(made =>
+      uid !== 0 || gid !== process.getgid()
+      ? chownr(made || path, uid, gid).then(() => made)
+      : made))
 
-            // In the case of any other error, just see if there's a dir
-            // there already.  If so, then hooray!  If not, then something
-            // is borked.
-            default:
-                xfs.stat(p, function (er2, stat) {
-                    // if the stat fails, then that's super weird.
-                    // let the original error be the failure reason.
-                    if (er2 || !stat.isDirectory()) cb(er, made)
-                    else cb(null, made);
-                });
-                break;
-        }
-    });
+module.exports.sync = !doChown ? (path, opts) => mkdirp.sync(path, opts)
+  : (path, opts) => {
+    const {uid, gid} = inferOwner.sync(path)
+    const made = mkdirp.sync(path)
+    if (uid !== 0 || gid !== process.getgid())
+      chownr.sync(made || path, uid, gid)
+    return made
+  }
+
+
+/***/ }),
+
+/***/ "../../node_modules/mkdirp-infer-owner/node_modules/chownr/chownr.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+const fs = __webpack_require__("fs")
+const path = __webpack_require__("path")
+
+/* istanbul ignore next */
+const LCHOWN = fs.lchown ? 'lchown' : 'chown'
+/* istanbul ignore next */
+const LCHOWNSYNC = fs.lchownSync ? 'lchownSync' : 'chownSync'
+
+/* istanbul ignore next */
+const needEISDIRHandled = fs.lchown &&
+  !process.version.match(/v1[1-9]+\./) &&
+  !process.version.match(/v10\.[6-9]/)
+
+const lchownSync = (path, uid, gid) => {
+  try {
+    return fs[LCHOWNSYNC](path, uid, gid)
+  } catch (er) {
+    if (er.code !== 'ENOENT')
+      throw er
+  }
 }
 
-mkdirP.sync = function sync (p, opts, made) {
-    if (!opts || typeof opts !== 'object') {
-        opts = { mode: opts };
-    }
-    
-    var mode = opts.mode;
-    var xfs = opts.fs || fs;
-    
-    if (mode === undefined) {
-        mode = _0777 & (~process.umask());
-    }
-    if (!made) made = null;
+/* istanbul ignore next */
+const chownSync = (path, uid, gid) => {
+  try {
+    return fs.chownSync(path, uid, gid)
+  } catch (er) {
+    if (er.code !== 'ENOENT')
+      throw er
+  }
+}
 
-    p = path.resolve(p);
+/* istanbul ignore next */
+const handleEISDIR =
+  needEISDIRHandled ? (path, uid, gid, cb) => er => {
+    // Node prior to v10 had a very questionable implementation of
+    // fs.lchown, which would always try to call fs.open on a directory
+    // Fall back to fs.chown in those cases.
+    if (!er || er.code !== 'EISDIR')
+      cb(er)
+    else
+      fs.chown(path, uid, gid, cb)
+  }
+  : (_, __, ___, cb) => cb
 
+/* istanbul ignore next */
+const handleEISDirSync =
+  needEISDIRHandled ? (path, uid, gid) => {
     try {
-        xfs.mkdirSync(p, mode);
-        made = made || p;
+      return lchownSync(path, uid, gid)
+    } catch (er) {
+      if (er.code !== 'EISDIR')
+        throw er
+      chownSync(path, uid, gid)
     }
-    catch (err0) {
-        switch (err0.code) {
-            case 'ENOENT' :
-                made = sync(path.dirname(p), opts, made);
-                sync(p, opts, made);
-                break;
+  }
+  : (path, uid, gid) => lchownSync(path, uid, gid)
 
-            // In the case of any other error, just see if there's a dir
-            // there already.  If so, then hooray!  If not, then something
-            // is borked.
-            default:
-                var stat;
-                try {
-                    stat = xfs.statSync(p);
-                }
-                catch (err1) {
-                    throw err0;
-                }
-                if (!stat.isDirectory()) throw err0;
-                break;
-        }
+// fs.readdir could only accept an options object as of node v6
+const nodeVersion = process.version
+let readdir = (path, options, cb) => fs.readdir(path, options, cb)
+let readdirSync = (path, options) => fs.readdirSync(path, options)
+/* istanbul ignore next */
+if (/^v4\./.test(nodeVersion))
+  readdir = (path, options, cb) => fs.readdir(path, cb)
+
+const chown = (cpath, uid, gid, cb) => {
+  fs[LCHOWN](cpath, uid, gid, handleEISDIR(cpath, uid, gid, er => {
+    // Skip ENOENT error
+    cb(er && er.code !== 'ENOENT' ? er : null)
+  }))
+}
+
+const chownrKid = (p, child, uid, gid, cb) => {
+  if (typeof child === 'string')
+    return fs.lstat(path.resolve(p, child), (er, stats) => {
+      // Skip ENOENT error
+      if (er)
+        return cb(er.code !== 'ENOENT' ? er : null)
+      stats.name = child
+      chownrKid(p, stats, uid, gid, cb)
+    })
+
+  if (child.isDirectory()) {
+    chownr(path.resolve(p, child.name), uid, gid, er => {
+      if (er)
+        return cb(er)
+      const cpath = path.resolve(p, child.name)
+      chown(cpath, uid, gid, cb)
+    })
+  } else {
+    const cpath = path.resolve(p, child.name)
+    chown(cpath, uid, gid, cb)
+  }
+}
+
+
+const chownr = (p, uid, gid, cb) => {
+  readdir(p, { withFileTypes: true }, (er, children) => {
+    // any error other than ENOTDIR or ENOTSUP means it's not readable,
+    // or doesn't exist.  give up.
+    if (er) {
+      if (er.code === 'ENOENT')
+        return cb()
+      else if (er.code !== 'ENOTDIR' && er.code !== 'ENOTSUP')
+        return cb(er)
+    }
+    if (er || !children.length)
+      return chown(p, uid, gid, cb)
+
+    let len = children.length
+    let errState = null
+    const then = er => {
+      if (errState)
+        return
+      if (er)
+        return cb(errState = er)
+      if (-- len === 0)
+        return chown(p, uid, gid, cb)
     }
 
-    return made;
-};
+    children.forEach(child => chownrKid(p, child, uid, gid, then))
+  })
+}
+
+const chownrKidSync = (p, child, uid, gid) => {
+  if (typeof child === 'string') {
+    try {
+      const stats = fs.lstatSync(path.resolve(p, child))
+      stats.name = child
+      child = stats
+    } catch (er) {
+      if (er.code === 'ENOENT')
+        return
+      else
+        throw er
+    }
+  }
+
+  if (child.isDirectory())
+    chownrSync(path.resolve(p, child.name), uid, gid)
+
+  handleEISDirSync(path.resolve(p, child.name), uid, gid)
+}
+
+const chownrSync = (p, uid, gid) => {
+  let children
+  try {
+    children = readdirSync(p, { withFileTypes: true })
+  } catch (er) {
+    if (er.code === 'ENOENT')
+      return
+    else if (er.code === 'ENOTDIR' || er.code === 'ENOTSUP')
+      return handleEISDirSync(p, uid, gid)
+    else
+      throw er
+  }
+
+  if (children && children.length)
+    children.forEach(child => chownrKidSync(p, child, uid, gid))
+
+  return handleEISDirSync(p, uid, gid)
+}
+
+module.exports = chownr
+chownr.sync = chownrSync
+
+
+/***/ }),
+
+/***/ "../../node_modules/mkdirp-infer-owner/node_modules/mkdirp/index.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+const optsArg = __webpack_require__("../../node_modules/mkdirp-infer-owner/node_modules/mkdirp/lib/opts-arg.js")
+const pathArg = __webpack_require__("../../node_modules/mkdirp-infer-owner/node_modules/mkdirp/lib/path-arg.js")
+
+const {mkdirpNative, mkdirpNativeSync} = __webpack_require__("../../node_modules/mkdirp-infer-owner/node_modules/mkdirp/lib/mkdirp-native.js")
+const {mkdirpManual, mkdirpManualSync} = __webpack_require__("../../node_modules/mkdirp-infer-owner/node_modules/mkdirp/lib/mkdirp-manual.js")
+const {useNative, useNativeSync} = __webpack_require__("../../node_modules/mkdirp-infer-owner/node_modules/mkdirp/lib/use-native.js")
+
+
+const mkdirp = (path, opts) => {
+  path = pathArg(path)
+  opts = optsArg(opts)
+  return useNative(opts)
+    ? mkdirpNative(path, opts)
+    : mkdirpManual(path, opts)
+}
+
+const mkdirpSync = (path, opts) => {
+  path = pathArg(path)
+  opts = optsArg(opts)
+  return useNativeSync(opts)
+    ? mkdirpNativeSync(path, opts)
+    : mkdirpManualSync(path, opts)
+}
+
+mkdirp.sync = mkdirpSync
+mkdirp.native = (path, opts) => mkdirpNative(pathArg(path), optsArg(opts))
+mkdirp.manual = (path, opts) => mkdirpManual(pathArg(path), optsArg(opts))
+mkdirp.nativeSync = (path, opts) => mkdirpNativeSync(pathArg(path), optsArg(opts))
+mkdirp.manualSync = (path, opts) => mkdirpManualSync(pathArg(path), optsArg(opts))
+
+module.exports = mkdirp
+
+
+/***/ }),
+
+/***/ "../../node_modules/mkdirp-infer-owner/node_modules/mkdirp/lib/find-made.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+const {dirname} = __webpack_require__("path")
+
+const findMade = (opts, parent, path = undefined) => {
+  // we never want the 'made' return value to be a root directory
+  if (path === parent)
+    return Promise.resolve()
+
+  return opts.statAsync(parent).then(
+    st => st.isDirectory() ? path : undefined, // will fail later
+    er => er.code === 'ENOENT'
+      ? findMade(opts, dirname(parent), parent)
+      : undefined
+  )
+}
+
+const findMadeSync = (opts, parent, path = undefined) => {
+  if (path === parent)
+    return undefined
+
+  try {
+    return opts.statSync(parent).isDirectory() ? path : undefined
+  } catch (er) {
+    return er.code === 'ENOENT'
+      ? findMadeSync(opts, dirname(parent), parent)
+      : undefined
+  }
+}
+
+module.exports = {findMade, findMadeSync}
+
+
+/***/ }),
+
+/***/ "../../node_modules/mkdirp-infer-owner/node_modules/mkdirp/lib/mkdirp-manual.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+const {dirname} = __webpack_require__("path")
+
+const mkdirpManual = (path, opts, made) => {
+  opts.recursive = false
+  const parent = dirname(path)
+  if (parent === path) {
+    return opts.mkdirAsync(path, opts).catch(er => {
+      // swallowed by recursive implementation on posix systems
+      // any other error is a failure
+      if (er.code !== 'EISDIR')
+        throw er
+    })
+  }
+
+  return opts.mkdirAsync(path, opts).then(() => made || path, er => {
+    if (er.code === 'ENOENT')
+      return mkdirpManual(parent, opts)
+        .then(made => mkdirpManual(path, opts, made))
+    if (er.code !== 'EEXIST' && er.code !== 'EROFS')
+      throw er
+    return opts.statAsync(path).then(st => {
+      if (st.isDirectory())
+        return made
+      else
+        throw er
+    }, () => { throw er })
+  })
+}
+
+const mkdirpManualSync = (path, opts, made) => {
+  const parent = dirname(path)
+  opts.recursive = false
+
+  if (parent === path) {
+    try {
+      return opts.mkdirSync(path, opts)
+    } catch (er) {
+      // swallowed by recursive implementation on posix systems
+      // any other error is a failure
+      if (er.code !== 'EISDIR')
+        throw er
+      else
+        return
+    }
+  }
+
+  try {
+    opts.mkdirSync(path, opts)
+    return made || path
+  } catch (er) {
+    if (er.code === 'ENOENT')
+      return mkdirpManualSync(path, opts, mkdirpManualSync(parent, opts, made))
+    if (er.code !== 'EEXIST' && er.code !== 'EROFS')
+      throw er
+    try {
+      if (!opts.statSync(path).isDirectory())
+        throw er
+    } catch (_) {
+      throw er
+    }
+  }
+}
+
+module.exports = {mkdirpManual, mkdirpManualSync}
+
+
+/***/ }),
+
+/***/ "../../node_modules/mkdirp-infer-owner/node_modules/mkdirp/lib/mkdirp-native.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+const {dirname} = __webpack_require__("path")
+const {findMade, findMadeSync} = __webpack_require__("../../node_modules/mkdirp-infer-owner/node_modules/mkdirp/lib/find-made.js")
+const {mkdirpManual, mkdirpManualSync} = __webpack_require__("../../node_modules/mkdirp-infer-owner/node_modules/mkdirp/lib/mkdirp-manual.js")
+
+const mkdirpNative = (path, opts) => {
+  opts.recursive = true
+  const parent = dirname(path)
+  if (parent === path)
+    return opts.mkdirAsync(path, opts)
+
+  return findMade(opts, path).then(made =>
+    opts.mkdirAsync(path, opts).then(() => made)
+    .catch(er => {
+      if (er.code === 'ENOENT')
+        return mkdirpManual(path, opts)
+      else
+        throw er
+    }))
+}
+
+const mkdirpNativeSync = (path, opts) => {
+  opts.recursive = true
+  const parent = dirname(path)
+  if (parent === path)
+    return opts.mkdirSync(path, opts)
+
+  const made = findMadeSync(opts, path)
+  try {
+    opts.mkdirSync(path, opts)
+    return made
+  } catch (er) {
+    if (er.code === 'ENOENT')
+      return mkdirpManualSync(path, opts)
+    else
+      throw er
+  }
+}
+
+module.exports = {mkdirpNative, mkdirpNativeSync}
+
+
+/***/ }),
+
+/***/ "../../node_modules/mkdirp-infer-owner/node_modules/mkdirp/lib/opts-arg.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+const { promisify } = __webpack_require__("util")
+const fs = __webpack_require__("fs")
+const optsArg = opts => {
+  if (!opts)
+    opts = { mode: 0o777, fs }
+  else if (typeof opts === 'object')
+    opts = { mode: 0o777, fs, ...opts }
+  else if (typeof opts === 'number')
+    opts = { mode: opts, fs }
+  else if (typeof opts === 'string')
+    opts = { mode: parseInt(opts, 8), fs }
+  else
+    throw new TypeError('invalid options argument')
+
+  opts.mkdir = opts.mkdir || opts.fs.mkdir || fs.mkdir
+  opts.mkdirAsync = promisify(opts.mkdir)
+  opts.stat = opts.stat || opts.fs.stat || fs.stat
+  opts.statAsync = promisify(opts.stat)
+  opts.statSync = opts.statSync || opts.fs.statSync || fs.statSync
+  opts.mkdirSync = opts.mkdirSync || opts.fs.mkdirSync || fs.mkdirSync
+  return opts
+}
+module.exports = optsArg
+
+
+/***/ }),
+
+/***/ "../../node_modules/mkdirp-infer-owner/node_modules/mkdirp/lib/path-arg.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+const platform = process.env.__TESTING_MKDIRP_PLATFORM__ || process.platform
+const { resolve, parse } = __webpack_require__("path")
+const pathArg = path => {
+  if (/\0/.test(path)) {
+    // simulate same failure that node raises
+    throw Object.assign(
+      new TypeError('path must be a string without null bytes'),
+      {
+        path,
+        code: 'ERR_INVALID_ARG_VALUE',
+      }
+    )
+  }
+
+  path = resolve(path)
+  if (platform === 'win32') {
+    const badWinChars = /[*|"<>?:]/
+    const {root} = parse(path)
+    if (badWinChars.test(path.substr(root.length))) {
+      throw Object.assign(new Error('Illegal characters in path.'), {
+        path,
+        code: 'EINVAL',
+      })
+    }
+  }
+
+  return path
+}
+module.exports = pathArg
+
+
+/***/ }),
+
+/***/ "../../node_modules/mkdirp-infer-owner/node_modules/mkdirp/lib/use-native.js":
+/***/ (function(module, exports, __webpack_require__) {
+
+const fs = __webpack_require__("fs")
+
+const version = process.env.__TESTING_MKDIRP_NODE_VERSION__ || process.version
+const versArr = version.replace(/^v/, '').split('.')
+const hasNative = +versArr[0] > 10 || +versArr[0] === 10 && +versArr[1] >= 12
+
+const useNative = !hasNative ? () => false : opts => opts.mkdir === fs.mkdir
+const useNativeSync = !hasNative ? () => false : opts => opts.mkdirSync === fs.mkdirSync
+
+module.exports = {useNative, useNativeSync}
 
 
 /***/ }),
@@ -63215,7 +63656,7 @@ class CliError extends Error {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return isFile; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return createSymlink; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() { return tryRealpath; });
-/* harmony import */ var cmd_shim__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("../../node_modules/cmd-shim/index.js");
+/* harmony import */ var cmd_shim__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("../../node_modules/cmd-shim/lib/index.js");
 /* harmony import */ var cmd_shim__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(cmd_shim__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var del__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__("../../node_modules/del/index.js");
 /* harmony import */ var del__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(del__WEBPACK_IMPORTED_MODULE_1__);
@@ -63245,7 +63686,6 @@ const readFile = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(fs__WEBP
 const writeFile = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_2___default.a.writeFile);
 const symlink = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_2___default.a.symlink);
 const chmod = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_2___default.a.chmod);
-const cmdShim = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(cmd_shim__WEBPACK_IMPORTED_MODULE_0___default.a);
 const mkdir = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_2___default.a.mkdir);
 const realpathNative = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_2___default.a.realpath.native);
 const mkdirp = async path => await mkdir(path, {
@@ -63307,7 +63747,7 @@ async function isFile(path) {
 async function createSymlink(src, dest, type) {
   if (process.platform === 'win32') {
     if (type === 'exec') {
-      await cmdShim(src, dest);
+      await cmd_shim__WEBPACK_IMPORTED_MODULE_0___default()(src, dest);
     } else {
       await forceCreate(src, dest, type);
     }

@@ -5975,10 +5975,10 @@
   resolved "https://registry.yarnpkg.com/@types/clone/-/clone-2.1.1.tgz#9b880d0ce9b1f209b5e0bd6d9caa38209db34024"
   integrity sha512-BZIU34bSYye0j/BFcPraiDZ5ka6MJADjcDVELGf7glr9K+iE8NYVjFslJFVWzskSxkLLyCrSPScE82/UUoBSvg==
 
-"@types/cmd-shim@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@types/cmd-shim/-/cmd-shim-2.0.0.tgz#c3d81d3c2a51af3c65c19b4f1d493a75abf07a5c"
-  integrity sha512-WuV5bOQTGxqzewPnJbrDe51I5mnX2wTRYy+PduRuIvSuBWZlxDYD6Qt/f1m5sezxx1yyE9+1wHJ/0sRuNIoFaQ==
+"@types/cmd-shim@^5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@types/cmd-shim/-/cmd-shim-5.0.0.tgz#3ff3eafaeaff7659c2221b6e3b8975408cdeac23"
+  integrity sha512-SqfgpKfWXj/AUCbUGp2V6Lv27eF5TOHnKj6XJpSfg5ERAz6rICvKn8o6ELmZx5hnFsMxsozyWgxgN03g71vb7g==
 
 "@types/color-convert@*", "@types/color-convert@^2.0.0":
   version "2.0.0"
@@ -11163,13 +11163,12 @@ clsx@^1.0.1, clsx@^1.1.1:
   resolved "https://registry.yarnpkg.com/clsx/-/clsx-1.1.1.tgz#98b3134f9abbdf23b2663491ace13c5c03a73188"
   integrity sha512-6/bPho624p3S2pMyvP5kKBPXnI3ufHLObBFCfgx+LkeR5lg2XYy2hqZqUf45ypD8COn2bhgGJSUE+l5dhNBieA==
 
-cmd-shim@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/cmd-shim/-/cmd-shim-2.1.0.tgz#e59a08d4248dda3bb502044083a4db4ac890579a"
-  integrity sha512-A5C0Cyf2H8sKsHqX0tvIWRXw5/PK++3Dc0lDbsugr90nOECLLuSPahVQBG8pgmgiXgm/TzBWMqI2rWdZwHduAw==
+cmd-shim@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/cmd-shim/-/cmd-shim-5.0.0.tgz#8d0aaa1a6b0708630694c4dbde070ed94c707724"
+  integrity sha512-qkCtZ59BidfEwHltnJwkyVZn+XQojdAySM1D1gSeh11Z4pW1Kpolkyo53L5noc0nrxmIvyFwTmJRo4xs7FFLPw==
   dependencies:
-    graceful-fs "^4.1.2"
-    mkdirp "~0.5.0"
+    mkdirp-infer-owner "^2.0.0"
 
 co@^4.6.0:
   version "4.6.0"
@@ -20980,7 +20979,16 @@ mkdirp-classic@^0.5.2, mkdirp-classic@^0.5.3:
   resolved "https://registry.yarnpkg.com/mkdirp-classic/-/mkdirp-classic-0.5.3.tgz#fa10c9115cc6d8865be221ba47ee9bed78601113"
   integrity sha512-gKLcREMhtuZRwRAfqP3RFW+TK4JqApVBtOIftVgjuABpAtpxhPGaDcfvbhNvD0B8iD1oUr/txX35NjcaY6Ns/A==
 
-mkdirp@^0.5.0, mkdirp@^0.5.1, mkdirp@^0.5.3, mkdirp@~0.5.0, mkdirp@~0.5.1:
+mkdirp-infer-owner@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/mkdirp-infer-owner/-/mkdirp-infer-owner-2.0.0.tgz#55d3b368e7d89065c38f32fd38e638f0ab61d316"
+  integrity sha512-sdqtiFt3lkOaYvTXSRIUjkIdPTcxgv5+fgqYE/5qgwdw12cOrAuzzgzvVExIkH/ul1oeHN3bCLOWSG3XOqbKKw==
+  dependencies:
+    chownr "^2.0.0"
+    infer-owner "^1.0.4"
+    mkdirp "^1.0.3"
+
+mkdirp@^0.5.0, mkdirp@^0.5.1, mkdirp@^0.5.3, mkdirp@~0.5.1:
   version "0.5.4"
   resolved "https://registry.yarnpkg.com/mkdirp/-/mkdirp-0.5.4.tgz#fd01504a6797ec5c9be81ff43d204961ed64a512"
   integrity sha512-iG9AK/dJLtJ0XNgTuDbSyNS3zECqDlAhnQW4CsNxBG3LQJBbHmRX1egw39DmtOdCAqY+dKXV+sgPgilNWUKMVw==

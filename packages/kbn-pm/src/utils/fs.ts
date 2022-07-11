@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import cmdShimCb from 'cmd-shim';
+import cmdShim from 'cmd-shim';
 import del from 'del';
 import fs from 'fs';
 import { ncp } from 'ncp';
@@ -18,7 +18,6 @@ export const readFile = promisify(fs.readFile);
 export const writeFile = promisify(fs.writeFile);
 const symlink = promisify(fs.symlink);
 export const chmod = promisify(fs.chmod);
-const cmdShim = promisify<string, string>(cmdShimCb);
 const mkdir = promisify(fs.mkdir);
 const realpathNative = promisify(fs.realpath.native);
 export const mkdirp = async (path: string) => await mkdir(path, { recursive: true });
