@@ -75,6 +75,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
     },
     externals,
     module: {
+      noParse: [/[\/\\]node_modules[\/\\]vega[\/\\]build-es5[\/\\]vega\.js$/],
       rules: [
         {
           test: /\.(html|md|txt|tmpl)$/,
