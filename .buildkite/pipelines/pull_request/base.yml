@@ -10,6 +10,7 @@ steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution and Plugins
     agents:
+      imageProject: elastic-images-qa
       machineType: n2-standard-16
       preemptible: true
     key: build
@@ -23,6 +24,7 @@ steps:
   - command: .buildkite/scripts/steps/quick_checks.sh
     label: 'Quick Checks'
     agents:
+      imageProject: elastic-images-qa
       machineType: n2-highcpu-8
       preemptible: true
     key: quick_checks
@@ -37,6 +39,7 @@ steps:
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
     label: Mark CI Stats as ready
     agents:
+      imageProject: elastic-images-qa
       machineType: n2-standard-2
     timeout_in_minutes: 10
     depends_on:
@@ -50,6 +53,7 @@ steps:
   - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
     label: 'Pick Test Group Run Order'
     agents:
+      imageProject: elastic-images-qa
       machineType: n2-standard-2
     timeout_in_minutes: 10
     env:
@@ -64,6 +68,7 @@ steps:
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:
+      imageProject: elastic-images-qa
       machineType: n2-standard-8
       preemptible: true
     key: linting
@@ -76,6 +81,7 @@ steps:
   - command: .buildkite/scripts/steps/check_types.sh
     label: 'Check Types'
     agents:
+      imageProject: elastic-images-qa
       machineType: n2-standard-4
       preemptible: true
     key: check_types
@@ -88,6 +94,7 @@ steps:
   - command: .buildkite/scripts/steps/lint_with_types.sh
     label: 'Linting (with types)'
     agents:
+      imageProject: elastic-images-qa
       machineType: n2-standard-16
       preemptible: true
     key: linting_with_types
@@ -112,6 +119,7 @@ steps:
   - command: .buildkite/scripts/steps/checks/capture_oas_snapshot.sh
     label: 'Check OAS Snapshot'
     agents:
+      imageProject: elastic-images-qa
       machineType: n2-standard-2
       preemptible: true
     timeout_in_minutes: 60
@@ -123,6 +131,7 @@ steps:
   - command: .buildkite/scripts/steps/api_docs/build_api_docs.sh
     label: 'Build API Docs'
     agents:
+      imageProject: elastic-images-qa
       machineType: n2-standard-4
       preemptible: true
     key: build_api_docs
