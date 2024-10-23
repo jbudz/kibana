@@ -91,7 +91,7 @@ steps:
     label: 'Check Types'
     parallelism: 5
     agents:
-      machineType: c4-standard-2
+      machineType: c4-highmem-2
       diskType: 'hyperdisk-balanced'
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c
