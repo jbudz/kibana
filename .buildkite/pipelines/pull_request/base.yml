@@ -78,6 +78,7 @@ steps:
     parallelism: 5
     agents:
       machineType: c4-standard-4
+      diskType: 'hyperdisk-balanced'
       preemptible: true
       spotZones:
         - us-central1-a
@@ -95,6 +96,7 @@ steps:
     parallelism: 5
     agents:
       machineType: c4-standard-2
+      diskType: 'hyperdisk-balanced'
       preemptible: true
       spotZones:
         - us-central1-a
