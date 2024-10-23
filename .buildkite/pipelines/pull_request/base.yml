@@ -80,10 +80,7 @@ steps:
       machineType: c4-standard-4
       diskType: 'hyperdisk-balanced'
       preemptible: true
-      spotZones:
-        - us-central1-a
-        - us-central1-b
-        - us-central1-c
+      spotZones: us-central1-a,us-central1-b,us-central1-c
     timeout_in_minutes: 70
     retry:
       automatic:
@@ -97,10 +94,7 @@ steps:
       machineType: c4-standard-2
       diskType: 'hyperdisk-balanced'
       preemptible: true
-      spotZones:
-        - us-central1-a
-        - us-central1-b
-        - us-central1-c
+      spotZones: us-central1-a,us-central1-b,us-central1-c
     timeout_in_minutes: 70
     retry:
       automatic:
