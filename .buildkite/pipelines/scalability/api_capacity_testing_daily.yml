@@ -17,6 +17,7 @@ steps:
       provider: gcp
       machineType: n2-standard-16
       preemptible: true
+      diskSizeGb: 75
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 60

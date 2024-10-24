@@ -23,6 +23,7 @@ steps:
       provider: gcp
       machineType: n2-standard-16
       preemptible: true
+      diskSizeGb: 75
     key: build
     timeout_in_minutes: 60
     retry:
@@ -57,6 +58,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -74,6 +76,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -91,6 +94,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -108,6 +112,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -125,6 +130,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -142,6 +148,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -159,6 +166,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -176,6 +184,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -193,6 +202,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -210,6 +220,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -227,6 +238,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -244,6 +256,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -261,6 +274,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -278,6 +292,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -295,6 +310,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -312,6 +328,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -329,6 +346,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -346,6 +364,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     depends_on:
       - build
     timeout_in_minutes: 60

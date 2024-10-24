@@ -28,6 +28,7 @@ steps:
       provider: gcp
       machineType: n2-standard-2
       preemptible: true
+      diskSizeGb: 75
     depends_on: build
     key: tests
     timeout_in_minutes: 90

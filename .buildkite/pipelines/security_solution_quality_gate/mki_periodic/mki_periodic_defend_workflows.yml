@@ -14,6 +14,7 @@ steps:
           localSsdInterface: nvme
           machineType: n2-standard-4
           preemptible: true
+      diskSizeGb: 75
         timeout_in_minutes: 300
         parallelism: 5
         retry:
@@ -104,6 +105,7 @@ steps:
           localSsdInterface: nvme
           machineType: n2-standard-4
           preemptible: true
+      diskSizeGb: 75
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -122,6 +124,7 @@ steps:
           localSsdInterface: nvme
           machineType: n2-standard-4
           preemptible: true
+      diskSizeGb: 75
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -140,6 +143,7 @@ steps:
           localSsdInterface: nvme
           machineType: n2-standard-4
           preemptible: true
+      diskSizeGb: 75
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -161,6 +165,7 @@ steps:
           localSsdInterface: nvme
           machineType: n2-standard-4
           preemptible: true
+      diskSizeGb: 75
         timeout_in_minutes: 300
         parallelism: 3
         retry:

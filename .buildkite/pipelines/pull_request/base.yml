@@ -13,6 +13,7 @@ steps:
       imageProject: elastic-images-qa
       machineType: n2-standard-16
       preemptible: true
+      diskSizeGb: 75
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 90
@@ -27,6 +28,7 @@ steps:
       imageProject: elastic-images-qa
       machineType: n2-highcpu-8
       preemptible: true
+      diskSizeGb: 75
     key: quick_checks
     timeout_in_minutes: 60
     retry:
@@ -71,6 +73,7 @@ steps:
       imageProject: elastic-images-qa
       machineType: n2-standard-8
       preemptible: true
+      diskSizeGb: 75
     key: linting
     timeout_in_minutes: 60
     retry:
@@ -84,6 +87,7 @@ steps:
       imageProject: elastic-images-qa
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     key: check_types
     timeout_in_minutes: 70
     retry:
@@ -97,6 +101,7 @@ steps:
       imageProject: elastic-images-qa
       machineType: n2-standard-16
       preemptible: true
+      diskSizeGb: 75
     key: linting_with_types
     timeout_in_minutes: 90
     retry:
@@ -110,6 +115,7 @@ steps:
     agents:
       machineType: n2-standard-2
       preemptible: true
+      diskSizeGb: 75
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -122,6 +128,7 @@ steps:
       imageProject: elastic-images-qa
       machineType: n2-standard-2
       preemptible: true
+      diskSizeGb: 75
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -134,6 +141,7 @@ steps:
       imageProject: elastic-images-qa
       machineType: n2-standard-4
       preemptible: true
+      diskSizeGb: 75
     key: build_api_docs
     timeout_in_minutes: 90
     retry:

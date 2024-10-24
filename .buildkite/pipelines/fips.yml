@@ -21,6 +21,7 @@ steps:
     agents:
       machineType: n2-standard-16
       preemptible: true
+      diskSizeGb: 75
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     depends_on: pre-build
@@ -39,6 +40,7 @@ steps:
     agents:
       machineType: n2-standard-2
       preemptible: true
+      diskSizeGb: 75
 
   - command: .buildkite/scripts/steps/fips/smoke_test.sh
     label: 'Pick Smoke Test Group Run Order'
