@@ -91,8 +91,7 @@ steps:
     label: 'Check Types'
     parallelism: 5
     agents:
-      machineType: c4-highmem-2
-      diskType: 'hyperdisk-balanced'
+      machineType: c3d-standard-8-lssd
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c
     timeout_in_minutes: 70
@@ -100,6 +99,20 @@ steps:
       automatic:
         - exit_status: '-1'
           limit: 3
+
+  - command: .buildkite/scripts/steps/check_types.sh
+    label: 'Check Types'
+    parallelism: 5
+    agents:
+      machineType: c3d-standard-8
+      preemptible: true
+      spotZones: us-central1-a,us-central1-b,us-central1-c
+    timeout_in_minutes: 70
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
 
 #   - command: .buildkite/scripts/steps/lint_with_types.sh
 #     label: 'Linting (with types)'
