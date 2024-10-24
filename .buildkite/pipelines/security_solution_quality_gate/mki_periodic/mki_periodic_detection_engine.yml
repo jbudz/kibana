@@ -13,7 +13,7 @@ steps:
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
-      diskSizeGb: 75
+          diskSizeGb: 75
         # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 8
@@ -29,7 +29,7 @@ steps:
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
-      diskSizeGb: 75
+          diskSizeGb: 75
           # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
         timeout_in_minutes: 300
         parallelism: 6
@@ -46,7 +46,7 @@ steps:
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
-      diskSizeGb: 75
+          diskSizeGb: 75
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -62,7 +62,7 @@ steps:
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
-      diskSizeGb: 75
+          diskSizeGb: 75
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -78,7 +78,7 @@ steps:
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
-      diskSizeGb: 75
+          diskSizeGb: 75
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -94,7 +94,7 @@ steps:
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
-      diskSizeGb: 75
+          diskSizeGb: 75
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -110,7 +110,7 @@ steps:
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
-      diskSizeGb: 75
+          diskSizeGb: 75
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -126,7 +126,7 @@ steps:
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
-      diskSizeGb: 75
+          diskSizeGb: 75
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -142,7 +142,7 @@ steps:
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
-      diskSizeGb: 75
+          diskSizeGb: 75
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -158,7 +158,7 @@ steps:
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
-      diskSizeGb: 75
+          diskSizeGb: 75
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -174,7 +174,7 @@ steps:
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
-      diskSizeGb: 75
+          diskSizeGb: 75
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -190,7 +190,7 @@ steps:
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
-      diskSizeGb: 75
+          diskSizeGb: 75
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -206,7 +206,7 @@ steps:
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
-      diskSizeGb: 75
+          diskSizeGb: 75
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -222,7 +222,7 @@ steps:
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
-      diskSizeGb: 75
+          diskSizeGb: 75
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -238,7 +238,7 @@ steps:
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
-      diskSizeGb: 75
+          diskSizeGb: 75
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -254,7 +254,7 @@ steps:
           provider: gcp
           machineType: n2-standard-4
           preemptible: true
-      diskSizeGb: 75
+          diskSizeGb: 75
         timeout_in_minutes: 120
         retry:
           automatic:
