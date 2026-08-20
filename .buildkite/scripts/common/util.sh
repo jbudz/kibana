@@ -61,6 +61,26 @@ push_as_github_token() {
   )
 }
 
+push_tag_as_github_token() {
+  local tag_name="$1"
+
+  if [[ -z "${GITHUB_TOKEN:-}" ]]; then
+    echo "Missing required environment variable for GITHUB_TOKEN push: GITHUB_TOKEN" >&2
+    exit 1
+  fi
+
+  (
+    git_config_global="$(mktemp)"
+    trap 'rm -f "$git_config_global"' EXIT
+
+
+    GH_TOKEN="$GITHUB_TOKEN" GIT_CONFIG_GLOBAL="$git_config_global" gh auth setup-git --hostname github.com --force
+    GH_TOKEN="$GITHUB_TOKEN" GIT_CONFIG_GLOBAL="$git_config_global" git push \
+      "https://github.com/elastic/kibana.git" \
+      tag "$tag_name"
+  )
+}
+
 check_for_changed_files() {
   RED='\033[0;31m'
   YELLOW='\033[0;33m'

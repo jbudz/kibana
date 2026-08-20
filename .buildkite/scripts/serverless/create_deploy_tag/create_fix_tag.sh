@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+source .buildkite/scripts/common/util.sh
+
 echo "--- Verify $BUILDKITE_COMMIT exists in origin/$BUILDKITE_BRANCH"
 # Step 1: Check if the commit is in the specific named branch
 if git merge-base --is-ancestor $BUILDKITE_COMMIT origin/$BUILDKITE_BRANCH; then
@@ -27,4 +29,4 @@ echo "--- Create tag $BUILDKITE_BRANCH"
 git tag "$BUILDKITE_BRANCH" "$BUILDKITE_COMMIT"
 
 echo "--- Push tag $BUILDKITE_BRANCH"
-git push origin tag "$BUILDKITE_BRANCH"
+push_tag_as_github_token "$BUILDKITE_BRANCH"
