@@ -24,7 +24,6 @@ else
 fi
 
 echo "--- Create tag $BUILDKITE_BRANCH"
-git tag "$BUILDKITE_BRANCH" "$BUILDKITE_COMMIT"
-
-echo "--- Push tag $BUILDKITE_BRANCH"
-git push origin tag "$BUILDKITE_BRANCH"
+gh api --silent --method POST repos/elastic/kibana/git/refs \
+    --raw-field "ref=refs/tags/$BUILDKITE_BRANCH" \
+    --raw-field "sha=$BUILDKITE_COMMIT"
