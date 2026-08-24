@@ -7,18 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { emitPipeline, getAgentImageConfig, getPipeline } from '#pipeline-utils';
+import type { BuildkiteRetry } from '../buildkite';
 
-(async () => {
-  const pipeline: string[] = [];
+export const RETRY_INFRA: BuildkiteRetry = { automatic: [{ exit_status: '-1', limit: 3 }] };
 
-  try {
-    pipeline.push(getAgentImageConfig({ returnYaml: true }));
-    pipeline.push(getPipeline('.buildkite/pipelines/fips.yml', false));
+export const RETRY_FLAKY: BuildkiteRetry = {
+  automatic: [
+    { exit_status: '-1', limit: 3 },
+    { exit_status: '*', limit: 1 },
+  ],
+};
 
-    emitPipeline(pipeline);
-  } catch (ex) {
-    console.error('Error while generating the pipeline steps: ' + ex.message, ex);
-    process.exit(1);
-  }
-})();
+export const RETRY_ONCE: BuildkiteRetry = { automatic: [{ exit_status: '*', limit: 1 }] };
+
+export const NO_RETRY: BuildkiteRetry = { automatic: false };

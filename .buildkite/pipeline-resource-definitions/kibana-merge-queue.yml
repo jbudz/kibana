@@ -28,11 +28,15 @@ spec:
       branch_configuration: gh-readonly-queue/* gh-readonly-queue/*/*
       default_branch: main
       repository: elastic/kibana
-      pipeline_file: .buildkite/pipelines/merge_queue.yml
+      pipeline_file: .buildkite/scripts/pipelines/merge_queue/pipeline.sh
       initial_step_plugins:
         - sparse-checkout#v1.6.0:
             paths:
-              - .buildkite/pipelines/merge_queue.yml
+              - .buildkite
+              - .node-version
+              - package.json
+              - tsconfig.base.json
+              - versions.json
             cleanup_sparse_state: true
       skip_intermediate_builds: false
       provider_settings:

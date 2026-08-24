@@ -15,6 +15,7 @@
             }
         ] */
 
+import { stringify } from 'yaml';
 import prConfigs from '../../../pull_requests.json';
 import { runPreBuild } from './pre_build';
 import { getEvalTriggerStep } from '../../../pipelines/evals/eval_pipeline';
@@ -22,12 +23,15 @@ import {
   areChangesSkippable,
   doAnyChangesMatch,
   getAffectedPackages,
-  getAgentImageConfig,
   emitPipeline,
+  getAgentImageConfig,
   getPipeline,
+  getPipelineFromSteps,
   getPrChangesCached,
   isScoutTestPath,
   isScoutTestsOnlyDiff,
+  prSecurityCypressSteps,
+  pullRequestPipeline,
   registerCancelKeys,
   flushCancelOnGateFailureMetadata,
   type GetPipelineOptions,
@@ -39,6 +43,7 @@ import {
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 const emptyStep = `steps: []`;
 const cancelable: GetPipelineOptions = { cancelOnGateFailure: true };
+const SECURITY_CYPRESS_DEFINITIONS = /^\.buildkite\/pipeline-utils\/kibana_pipeline\//;
 
 if (!prConfig) {
   console.error(`'kibana-pull-request' pipeline not found in .buildkite/pull_requests.json`);
@@ -124,9 +129,8 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     const doAnySuiteRelevantChangesMatch = (paths: RegExp[]): Promise<boolean> =>
       doAnyChangesMatch(paths, suiteRelevantChanges);
 
-    pipeline.push(getAgentImageConfig({ returnYaml: true }));
-
     if (await doAllChangesMatch(/^renovate\.json$/)) {
+      pipeline.push(getAgentImageConfig({ returnYaml: true }));
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/renovate.yml', false));
       console.warn('Isolated changes to renovate.json. Skipping main PR pipeline.');
       emitPipeline(pipeline);
@@ -134,7 +138,21 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     }
 
     await runPreBuild();
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
+
+    const base = pullRequestPipeline();
+    pipeline.push(stringify({ agents: getAgentImageConfig(), ...base }));
+    // Everything downstream of the gates (build and CHECK_GATE steps) is canceled when a gate fails.
+    registerCancelKeys(
+      base.steps.flatMap((step) =>
+        'key' in step &&
+        typeof step.key === 'string' &&
+        step.key !== 'build' &&
+        !step.env?.CHECK_GATE
+          ? [step.key]
+          : []
+      )
+    );
+
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/local_check.yml', {}));
 
     // Gated together: check_api_contracts depends_on check_oas_snapshot.
@@ -144,14 +162,6 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       );
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/api_contracts.yml', cancelable));
     }
-
-    // Register steps from base.yml that should still be canceled on gate failure.
-    // base.yml itself is not loaded with cancelOnGateFailure because it contains the gate steps.
-    registerCancelKeys([
-      'pick_test_group_run_order',
-      'build_scout_tests',
-      'report_package_metrics',
-    ]);
 
     if (prHasFIPSLabel()) {
       pipeline.push(getPipeline('.buildkite/pipelines/fips/verify_fips_enabled.yml', cancelable));
@@ -354,19 +364,12 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     }
 
     if (
-      (await doAnySuiteRelevantChangesMatch([
-        /^\.buildkite\/pipelines\/pull_request\/security_solution\/cypress_burn\.yml/,
-      ])) ||
+      (await doAnySuiteRelevantChangesMatch([SECURITY_CYPRESS_DEFINITIONS])) ||
       GITHUB_PR_LABELS.includes('ci:cypress-burn') ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
-      pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/security_solution/cypress_burn.yml',
-          cancelable
-        )
-      );
+      pipeline.push(getPipelineFromSteps(prSecurityCypressSteps('cypress_burn'), cancelable));
     }
 
     if (
@@ -377,17 +380,12 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/solutions\/security\/test\/defend_workflows_cypress/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
         /^fleet_packages\.json/,
-        /^\.buildkite\/pipelines\/pull_request\/security_solution\/defend_workflows\.yml/,
+        SECURITY_CYPRESS_DEFINITIONS,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
-      pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/security_solution/defend_workflows.yml',
-          cancelable
-        )
-      );
+      pipeline.push(getPipelineFromSteps(prSecurityCypressSteps('defend_workflows'), cancelable));
     }
 
     if (
@@ -415,42 +413,16 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant-common/,
         /^x-pack\/test\/functional\/es_archives\/security_solution/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
-        /^\.buildkite\/pipelines\/pull_request\/security_solution\/ai_assistant\.yml/,
-        /^\.buildkite\/pipelines\/pull_request\/security_solution\/ai4dsoc\.yml/,
-        /^\.buildkite\/pipelines\/pull_request\/security_solution\/detection_engine\.yml/,
-        /^\.buildkite\/pipelines\/pull_request\/security_solution\/entity_analytics\.yml/,
-        /^\.buildkite\/pipelines\/pull_request\/security_solution\/rule_management\.yml/,
+        SECURITY_CYPRESS_DEFINITIONS,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
-      pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/security_solution/ai_assistant.yml',
-          cancelable
-        )
-      );
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/ai4dsoc.yml', cancelable)
-      );
-      pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/security_solution/detection_engine.yml',
-          cancelable
-        )
-      );
-      pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/security_solution/entity_analytics.yml',
-          cancelable
-        )
-      );
-      pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/security_solution/rule_management.yml',
-          cancelable
-        )
-      );
+      pipeline.push(getPipelineFromSteps(prSecurityCypressSteps('ai_assistant'), cancelable));
+      pipeline.push(getPipelineFromSteps(prSecurityCypressSteps('ai4dsoc'), cancelable));
+      pipeline.push(getPipelineFromSteps(prSecurityCypressSteps('detection_engine'), cancelable));
+      pipeline.push(getPipelineFromSteps(prSecurityCypressSteps('entity_analytics'), cancelable));
+      pipeline.push(getPipelineFromSteps(prSecurityCypressSteps('rule_management'), cancelable));
     }
 
     if (
@@ -513,14 +485,12 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/platform\/plugins\/shared\/usage_collection\/public/,
         /^x-pack\/test\/functional\/es_archives\/security_solution/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
-        /^\.buildkite\/pipelines\/pull_request\/security_solution\/explore\.yml/,
+        SECURITY_CYPRESS_DEFINITIONS,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution/explore.yml', cancelable)
-      );
+      pipeline.push(getPipelineFromSteps(prSecurityCypressSteps('explore'), cancelable));
     }
 
     if (
@@ -580,17 +550,12 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/platform\/plugins\/shared\/usage_collection\/public/,
         /^x-pack\/test\/functional\/es_archives\/security_solution/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
-        /^\.buildkite\/pipelines\/pull_request\/security_solution\/investigations\.yml/,
+        SECURITY_CYPRESS_DEFINITIONS,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
-      pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/security_solution/investigations.yml',
-          cancelable
-        )
-      );
+      pipeline.push(getPipelineFromSteps(prSecurityCypressSteps('investigations'), cancelable));
     }
 
     if (
@@ -598,18 +563,13 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/platform\/plugins\/shared\/osquery/,
         /^x-pack\/solutions\/security\/test\/osquery_cypress/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
-        /^\.buildkite\/pipelines\/pull_request\/security_solution\/osquery_cypress\.yml/,
+        SECURITY_CYPRESS_DEFINITIONS,
       ])) ||
         GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
         ALL_UI_TEST_SUITES) &&
       !GITHUB_PR_LABELS.includes('ci:skip-cypress-osquery')
     ) {
-      pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/security_solution/osquery_cypress.yml',
-          cancelable
-        )
-      );
+      pipeline.push(getPipelineFromSteps(prSecurityCypressSteps('osquery_cypress'), cancelable));
     }
 
     if (
@@ -618,16 +578,13 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/solutions\/security\/plugins\/cloud_security_posture/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
-        /^\.buildkite\/pipelines\/pull_request\/security_solution\/cloud_security_posture\.yml/,
+        SECURITY_CYPRESS_DEFINITIONS,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
       pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/security_solution/cloud_security_posture.yml',
-          cancelable
-        )
+        getPipelineFromSteps(prSecurityCypressSteps('cloud_security_posture'), cancelable)
       );
     }
 
@@ -682,17 +639,12 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       (await doAnySuiteRelevantChangesMatch([
         /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/asset_inventory/,
         /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
-        /^\.buildkite\/pipelines\/pull_request\/security_solution\/asset_inventory\.yml/,
+        SECURITY_CYPRESS_DEFINITIONS,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
-      pipeline.push(
-        getPipeline(
-          '.buildkite/pipelines/pull_request/security_solution/asset_inventory.yml',
-          cancelable
-        )
-      );
+      pipeline.push(getPipelineFromSteps(prSecurityCypressSteps('asset_inventory'), cancelable));
     }
 
     // Check for prompt file changes and conditionally add pipeline step

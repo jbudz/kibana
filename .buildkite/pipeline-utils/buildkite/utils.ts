@@ -9,16 +9,28 @@
 
 import { execFileSync } from 'child_process';
 import fs from 'fs';
-import { parse as loadYaml } from 'yaml';
+import { parse as loadYaml, stringify } from 'yaml';
+import type { BuildkiteAgentTargetingRule, BuildkiteStep } from './client';
 
-export function emitPipeline(pipelineSteps: string[], debug = false) {
-  const pipelineStr = [...new Set(pipelineSteps)].join('\n');
+export interface EmitPipelineDocument {
+  env?: Record<string, string | number>;
+  agents?: BuildkiteAgentTargetingRule;
+  steps: BuildkiteStep[];
+}
 
-  if (debug) {
-    console.warn('Emitting pipeline:\n', pipelineStr);
+/** Emits a pipeline by writing to stdout, which Buildkite picks up as the pipeline upload. */
+export function emitPipeline(pipelineSteps: string[], debug?: boolean): void;
+export function emitPipeline(doc: EmitPipelineDocument): void;
+export function emitPipeline(arg: string[] | EmitPipelineDocument, debug = false): void {
+  if (Array.isArray(arg)) {
+    const pipelineStr = [...new Set(arg)].join('\n');
+    if (debug) {
+      console.warn('Emitting pipeline:\n', pipelineStr);
+    }
+    console.log(pipelineStr);
+  } else {
+    console.log(stringify(arg));
   }
-
-  console.log(pipelineStr);
 }
 
 export interface GetPipelineOptions {
@@ -140,4 +152,20 @@ export const getPipeline = (filename: string, options?: boolean | GetPipelineOpt
   }
 
   return opts.removeSteps ? str.replace(/^steps:/, '') : str;
+};
+
+// Renders steps as a YAML fragment (no `steps:` header) for composition with getPipeline() fragments.
+export const getPipelineFromSteps = (
+  steps: BuildkiteStep[],
+  options?: Pick<GetPipelineOptions, 'cancelOnGateFailure'>
+): string => {
+  if (steps.length === 0) {
+    return '';
+  }
+
+  if (options?.cancelOnGateFailure) {
+    registerCancelOnGateFailureMetadata(extractStepKeys('generated steps', { steps }));
+  }
+
+  return stringify({ steps }).replace(/^steps:\n/, '');
 };

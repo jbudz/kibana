@@ -182,8 +182,8 @@ The deliverable **Tests** table **always lists FTR**. If legacy suites remain on
 
 | Phase | Source hints |
 |-------|---------------|
-| PR CI | [.buildkite/pipelines/pull_request/base.yml](../../../../../../../../.buildkite/pipelines/pull_request/base.yml) (`build_scout_tests`), [.buildkite/scripts/pipelines/pull_request/pipeline.ts](../../../../../../../../.buildkite/scripts/pipelines/pull_request/pipeline.ts), [.buildkite/scout_ci_config.yml](../../../../../../../../.buildkite/scout_ci_config.yml) |
-| Post-merge | [.buildkite/pipelines/on_merge.yml](../../../../../../../../.buildkite/pipelines/on_merge.yml) (`build_scout_tests`) |
+| PR CI | [.buildkite/pipeline-utils/kibana_pipeline/pipelines/pull_request.ts](../../../../../../../../.buildkite/pipeline-utils/kibana_pipeline/pipelines/pull_request.ts) (`build_scout_tests`), [.buildkite/scripts/pipelines/pull_request/pipeline.ts](../../../../../../../../.buildkite/scripts/pipelines/pull_request/pipeline.ts), [.buildkite/scout_ci_config.yml](../../../../../../../../.buildkite/scout_ci_config.yml) |
+| Post-merge | [.buildkite/pipeline-utils/kibana_pipeline/pipelines/on_merge.ts](../../../../../../../../.buildkite/pipeline-utils/kibana_pipeline/pipelines/on_merge.ts) (`build_scout_tests`) |
 | Quality gates | `.buildkite/pipelines/quality-gates/`, `.buildkite/pipelines/security_solution_quality_gate/` |
 | Periodic | MKI periodic groups under `.buildkite/pipelines/security_solution_quality_gate/` |
 | Elastic Cloud / Appex QA | Scout (and related automation) may also run on Elastic Cloud pipelines documented for troubleshooting — see [Elastic Cloud pipelines](https://docs.elastic.dev/appex-qa/troubleshooting-cloud-failures#elastic-cloud-pipelines) (external). Supplements `.buildkite/` sources above. |
@@ -191,12 +191,8 @@ The deliverable **Tests** table **always lists FTR**. If legacy suites remain on
 **Search commands (run from repo root):**
 
 ```bash
-# PR CI — find pipelines that run this team's tests
-ls .buildkite/pipelines/pull_request/security_solution/
-rg -l '<team-keyword>' .buildkite/pipelines/pull_request/security_solution/
-
-# Post-merge
-grep -n '<team-keyword>' .buildkite/pipelines/security_solution_on_merge.yml
+# PR CI + post-merge — the security Cypress suites are defined once in:
+grep -n '<team-keyword>' .buildkite/pipeline-utils/kibana_pipeline/steps/security_cypress.ts
 
 # Quality gate + periodic
 ls .buildkite/pipelines/security_solution_quality_gate/

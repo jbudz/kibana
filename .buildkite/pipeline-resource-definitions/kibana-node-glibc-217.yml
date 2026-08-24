@@ -24,11 +24,15 @@ spec:
       repository: elastic/kibana
       branch_configuration: main
       default_branch: main
-      pipeline_file: ".buildkite/pipelines/node_glibc_217.yml"
+      pipeline_file: ".buildkite/scripts/pipelines/node_glibc_217/pipeline.sh"
       initial_step_plugins:
         - sparse-checkout#v1.6.0:
             paths:
-              - .buildkite/pipelines/node_glibc_217.yml
+              - .buildkite
+              - .node-version
+              - package.json
+              - tsconfig.base.json
+              - versions.json
             cleanup_sparse_state: true
       provider_settings:
         trigger_mode: none

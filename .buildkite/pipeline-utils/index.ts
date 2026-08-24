@@ -10,6 +10,7 @@
 export * from './affected-packages';
 export * from './agent_images';
 export * from './buildkite';
+export * from './kibana_pipeline';
 export * as CiStats from './ci-stats';
 export {
   isScoutTestPath,

@@ -12,6 +12,8 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { parse as loadYaml } from 'yaml';
+import { pullRequestPipeline, SECURITY_CYPRESS_SUITES } from '../kibana_pipeline';
+import type { BuildkiteStep } from './client';
 
 jest.mock('child_process', () => ({
   execFileSync: jest.fn(),
@@ -85,44 +87,13 @@ describe('getPipeline', () => {
     );
   });
 
-  it('verifies manually registered base.yml step keys exist', () => {
-    const repoRoot = path.resolve(__dirname, '../../..');
-    const pipelineSource = fs.readFileSync(
-      path.resolve(__dirname, '../../scripts/pipelines/pull_request/pipeline.ts'),
-      'utf8'
-    );
-
-    // Extract step keys from the registerCancelKeys([...]) call in pipeline.ts
-    const manualKeysMatch = pipelineSource.match(/registerCancelKeys\(\[([^\]]+)\]\)/s);
-    expect(manualKeysMatch).not.toBeNull();
-
-    const manualKeys = [...manualKeysMatch![1].matchAll(/'([^']+)'/g)].map(([, key]) => key);
-    expect(manualKeys.length).toBeGreaterThan(0);
-
-    // Parse base.yml and collect all step keys
-    const baseYml = fs.readFileSync(
-      path.resolve(repoRoot, '.buildkite/pipelines/pull_request/base.yml'),
-      'utf8'
-    );
-    const baseDoc = loadYaml(baseYml) as { steps: Array<{ key?: string }> };
-    const baseKeys = new Set(
-      baseDoc.steps
-        .filter((s: Record<string, unknown>) => typeof s.key === 'string')
-        .map((s: Record<string, unknown>) => s.key)
-    );
-
-    for (const key of manualKeys) {
-      expect(baseKeys).toContain(key);
-    }
-  });
-
   it('accepts every cancelable pull request pipeline fragment', () => {
     const repoRoot = path.resolve(__dirname, '../../..');
-    const pullRequestPipeline = path.resolve(
+    const pullRequestPipelinePath = path.resolve(
       __dirname,
       '../../scripts/pipelines/pull_request/pipeline.ts'
     );
-    const pipelineSource = fs.readFileSync(pullRequestPipeline, 'utf8');
+    const pipelineSource = fs.readFileSync(pullRequestPipelinePath, 'utf8');
     const cancelablePipelines = [
       ...new Set(
         [...pipelineSource.matchAll(/getPipeline\(\s*'([^']+\.yml)'\s*,\s*cancelable\s*\)/gs)].map(
@@ -138,13 +109,13 @@ describe('getPipeline', () => {
     }
   });
 
-  it('has no duplicate step keys across cancelable pipeline files and base.yml', () => {
+  it('has no duplicate step keys across cancelable pipeline files and generated steps', () => {
     const repoRoot = path.resolve(__dirname, '../../..');
-    const pullRequestPipeline = path.resolve(
+    const pullRequestPipelinePath = path.resolve(
       __dirname,
       '../../scripts/pipelines/pull_request/pipeline.ts'
     );
-    const pipelineSource = fs.readFileSync(pullRequestPipeline, 'utf8');
+    const pipelineSource = fs.readFileSync(pullRequestPipelinePath, 'utf8');
 
     // Collect all cancelable pipeline files
     const cancelablePipelines = [
@@ -154,9 +125,6 @@ describe('getPipeline', () => {
         )
       ),
     ];
-
-    // Also include base.yml
-    cancelablePipelines.push(path.resolve(repoRoot, '.buildkite/pipelines/pull_request/base.yml'));
 
     // These pipeline pairs are in if/else branches in pipeline.ts and can never
     // both be uploaded in the same build, so shared keys are safe.
@@ -194,6 +162,27 @@ describe('getPipeline', () => {
       };
 
       collectKeys(doc.steps);
+    }
+
+    // Also check the generated steps (pull_request/base.yml and the
+    // security_solution fragment files were replaced by typed modules).
+    const builderSource = 'pipeline-utils/kibana_pipeline (generated)';
+    const generatedKeys = [
+      ...pullRequestPipeline()
+        .steps.filter(
+          (s): s is BuildkiteStep & { key: string } =>
+            typeof s === 'object' && s !== null && 'key' in s && typeof s.key === 'string'
+        )
+        .map((s) => s.key),
+      // All cypress groups can be uploaded together (ci:all-cypress-suites).
+      ...SECURITY_CYPRESS_SUITES.map((suite) => suite.prKey),
+    ];
+    for (const key of generatedKeys) {
+      if (allKeys.has(key)) {
+        duplicates.push(`key "${key}" in ${builderSource} conflicts with ${allKeys.get(key)}`);
+      } else {
+        allKeys.set(key, builderSource);
+      }
     }
 
     expect(duplicates).toEqual([]);

@@ -27,7 +27,7 @@ Baseline snapshots are **stored in a GCP bucket** and served at:
 
 `https://storage.googleapis.com/kibana-so-types-snapshots/<git-sha>.json`
 
-They are **produced in the on-merge pipeline** after PRs are merged. In `.buildkite/pipelines/on_merge.yml`, the step "Extract Saved Object migration plugin types" (around lines 702–716) runs `.buildkite/scripts/steps/archive_so_migration_snapshot.sh`, which:
+They are **produced in the on-merge pipeline** after PRs are merged. In `.buildkite/pipeline-utils/kibana_pipeline/steps/publishing.ts`, the step "Extract Saved Object migration plugin types" (`archiveSoMigrationSnapshotStep`) runs `.buildkite/scripts/steps/archive_so_migration_snapshot.sh`, which:
 
 - Builds a snapshot of plugin SO type definitions with `node scripts/snapshot_plugin_types snapshot`
 - Uploads it as `<BUILDKITE_COMMIT>.json` to the bucket

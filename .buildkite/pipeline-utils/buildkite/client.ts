@@ -40,14 +40,21 @@ export interface BuildkiteAgentQueue {
   queue: string;
 }
 
+/** GCP agent targeting rule for gobld. Ref: https://github.com/elastic/ci/blob/main/docs/gobld/providers.mdx */
 export interface BuildkiteAgentTargetingRule {
-  provider?: string;
+  provider?: 'gcp' | 'k8s';
   image?: string;
   imageProject?: string;
+  imageUID?: string;
   machineType?: string;
   minCpuPlatform?: string;
   preemptible?: boolean;
+  spotZones?: string;
+  zones?: string;
   diskSizeGb?: number;
+  diskType?: string;
+  buildDirectory?: string;
+  enableNestedVirtualization?: boolean;
 }
 
 export type BuildkiteSignalReason =
@@ -66,7 +73,7 @@ export interface BuildkiteAutomaticRetryRule {
 }
 
 export interface BuildkiteRetry {
-  automatic: BuildkiteAutomaticRetryRule[];
+  automatic: BuildkiteAutomaticRetryRule[] | false;
 }
 
 // Retry on spot preemption / lost agent, never on timeouts
@@ -96,9 +103,15 @@ export interface BuildkiteCommandStep {
   agents: BuildkiteAgentQueue | BuildkiteAgentTargetingRule;
   timeout_in_minutes?: number;
   key?: string;
+  id?: string;
   depends_on?: string | string[];
   retry?: BuildkiteRetry;
   env?: { [key: string]: string | number };
+  if?: string;
+  branches?: string;
+  soft_fail?: boolean | Array<{ exit_status: number | '*' }>;
+  artifact_paths?: string | string[];
+  plugins?: Array<Record<string, unknown>>;
 }
 
 interface BuildkiteInputTextField {
@@ -176,8 +189,9 @@ export interface BuildkiteTriggerBuildParams {
 }
 
 export interface BuildkiteWaitStep {
-  wait: string;
+  wait: string | null;
   if?: string;
+  depends_on?: string | string[];
   allow_dependency_failure?: boolean;
   continue_on_failure?: boolean;
   branches?: string;
